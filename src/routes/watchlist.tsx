@@ -28,7 +28,9 @@ function WatchlistPage() {
         .from("watchlist")
         .select("movie:movies(*)")
         .eq("user_id", user.id);
-      const list = (data ?? []).map((r: { movie: Movie }) => r.movie).filter(Boolean);
+      const list = ((data ?? []) as unknown as Array<{ movie: Movie | null }>)
+        .map((r) => r.movie)
+        .filter((m): m is Movie => !!m);
       setMovies(list);
       setLoading(false);
     })();
