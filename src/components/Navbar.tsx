@@ -65,9 +65,12 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           {user ? (
             <>
-              <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[160px]">
-                {user.email}
-              </span>
+              <Button asChild variant="ghost" size="sm" aria-label="Rechercher">
+                <Link to="/search"><Search className="h-4 w-4" /></Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm" aria-label="Mon compte" className="hidden sm:inline-flex">
+                <Link to="/account"><UserIcon className="h-4 w-4" /></Link>
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -75,6 +78,7 @@ export function Navbar() {
                   await signOut();
                   navigate({ to: "/login" });
                 }}
+                aria-label="Déconnexion"
               >
                 <LogOut className="h-4 w-4" />
               </Button>
