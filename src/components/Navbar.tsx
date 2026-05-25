@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Film } from "lucide-react";
+import { LogOut, Settings, Film, Search, User as UserIcon } from "lucide-react";
 
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
@@ -39,6 +39,12 @@ export function Navbar() {
                 Accueil
               </Link>
               <Link
+                to="/browse"
+                className={`transition-colors hover:text-primary ${path.startsWith("/browse") ? "text-foreground" : "text-muted-foreground"}`}
+              >
+                Parcourir
+              </Link>
+              <Link
                 to="/watchlist"
                 className={`transition-colors hover:text-primary ${path === "/watchlist" ? "text-foreground" : "text-muted-foreground"}`}
               >
@@ -59,9 +65,12 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           {user ? (
             <>
-              <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[160px]">
-                {user.email}
-              </span>
+              <Button asChild variant="ghost" size="sm" aria-label="Rechercher">
+                <Link to="/search"><Search className="h-4 w-4" /></Link>
+              </Button>
+              <Button asChild variant="ghost" size="sm" aria-label="Mon compte" className="hidden sm:inline-flex">
+                <Link to="/account"><UserIcon className="h-4 w-4" /></Link>
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
@@ -69,6 +78,7 @@ export function Navbar() {
                   await signOut();
                   navigate({ to: "/login" });
                 }}
+                aria-label="Déconnexion"
               >
                 <LogOut className="h-4 w-4" />
               </Button>

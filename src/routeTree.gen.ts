@@ -10,8 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WatchIdRouteImport } from './routes/watch.$id'
 
@@ -20,14 +23,29 @@ const WatchlistRoute = WatchlistRouteImport.update({
   path: '/watchlist',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BrowseRoute = BrowseRouteImport.update({
+  id: '/browse',
+  path: '/browse',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccountRoute = AccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,38 +61,75 @@ const WatchIdRoute = WatchIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/browse': typeof BrowseRoute
   '/login': typeof LoginRoute
+  '/search': typeof SearchRoute
   '/watchlist': typeof WatchlistRoute
   '/watch/$id': typeof WatchIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/browse': typeof BrowseRoute
   '/login': typeof LoginRoute
+  '/search': typeof SearchRoute
   '/watchlist': typeof WatchlistRoute
   '/watch/$id': typeof WatchIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/browse': typeof BrowseRoute
   '/login': typeof LoginRoute
+  '/search': typeof SearchRoute
   '/watchlist': typeof WatchlistRoute
   '/watch/$id': typeof WatchIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/login' | '/watchlist' | '/watch/$id'
+  fullPaths:
+    | '/'
+    | '/account'
+    | '/admin'
+    | '/browse'
+    | '/login'
+    | '/search'
+    | '/watchlist'
+    | '/watch/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/login' | '/watchlist' | '/watch/$id'
-  id: '__root__' | '/' | '/admin' | '/login' | '/watchlist' | '/watch/$id'
+  to:
+    | '/'
+    | '/account'
+    | '/admin'
+    | '/browse'
+    | '/login'
+    | '/search'
+    | '/watchlist'
+    | '/watch/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/account'
+    | '/admin'
+    | '/browse'
+    | '/login'
+    | '/search'
+    | '/watchlist'
+    | '/watch/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
+  BrowseRoute: typeof BrowseRoute
   LoginRoute: typeof LoginRoute
+  SearchRoute: typeof SearchRoute
   WatchlistRoute: typeof WatchlistRoute
   WatchIdRoute: typeof WatchIdRoute
 }
@@ -88,6 +143,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WatchlistRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -95,11 +157,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/browse': {
+      id: '/browse'
+      path: '/browse'
+      fullPath: '/browse'
+      preLoaderRoute: typeof BrowseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/account': {
+      id: '/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -121,8 +197,11 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
+  BrowseRoute: BrowseRoute,
   LoginRoute: LoginRoute,
+  SearchRoute: SearchRoute,
   WatchlistRoute: WatchlistRoute,
   WatchIdRoute: WatchIdRoute,
 }
