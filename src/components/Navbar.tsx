@@ -39,6 +39,12 @@ export function Navbar() {
                 Accueil
               </Link>
               <Link
+                to="/browse"
+                className={`transition-colors hover:text-primary ${path.startsWith("/browse") ? "text-foreground" : "text-muted-foreground"}`}
+              >
+                Parcourir
+              </Link>
+              <Link
                 to="/watchlist"
                 className={`transition-colors hover:text-primary ${path === "/watchlist" ? "text-foreground" : "text-muted-foreground"}`}
               >
