@@ -234,9 +234,10 @@ function TracksAdmin() {
 
   const save = async (e: FormEvent) => {
     e.preventDefault();
-    if (!form.artist_id || !form.title || !form.audio_url) { toast.error("Artiste, titre et audio requis"); return; }
+    if (!form.artist_id || !form.title) { toast.error("Artiste et titre requis"); return; }
+    if (!form.audio_url && !form.spotify_url) { toast.error("Renseigne soit un fichier audio, soit un lien Spotify"); return; }
     setSaving(true);
-    const payload = { artist_id: form.artist_id, title: form.title, audio_url: form.audio_url, video_url: form.video_url || null, cover_url: form.cover_url || null, release_year: form.release_year ? parseInt(form.release_year) : null, spotify_url: form.spotify_url || null };
+    const payload = { artist_id: form.artist_id, title: form.title, audio_url: form.audio_url || "", video_url: form.video_url || null, cover_url: form.cover_url || null, release_year: form.release_year ? parseInt(form.release_year) : null, spotify_url: form.spotify_url || null };
     const { error } = editingId ? await supabase.from("tracks").update(payload).eq("id", editingId) : await supabase.from("tracks").insert(payload);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
@@ -264,12 +265,12 @@ function TracksAdmin() {
               </select>
             </Field>
             <Field label="Titre *"><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></Field>
-            <Field label="Audio * (mp3, wav…)" full><div className="flex gap-2"><Input value={form.audio_url} onChange={(e) => setForm({ ...form, audio_url: e.target.value })} required /><UploadButton accept="audio/*" folder="audio" onUploaded={(url) => setForm((f) => ({ ...f, audio_url: url }))} /></div></Field>
-            <Field label="Clip vidéo (URL YouTube/mp4)" full><div className="flex gap-2"><Input value={form.video_url} onChange={(e) => setForm({ ...form, video_url: e.target.value })} /><UploadButton accept="video/*" folder="videos" onUploaded={(url) => setForm((f) => ({ ...f, video_url: url }))} /></div></Field>
-            <Field label="Lien Spotify (titre)" full>
+            <Field label="Lien Spotify (recommandé)" full>
               <Input value={form.spotify_url} onChange={(e) => setForm({ ...form, spotify_url: e.target.value })} placeholder="https://open.spotify.com/track/..." />
-              <p className="text-xs text-muted-foreground mt-1">Quand ce lien est renseigné, l'écoute dans l'app déclenche aussi un vrai stream Spotify via le lecteur intégré.</p>
+              <p className="text-xs text-muted-foreground mt-1">Avec ce lien, la lecture se fait dans l'app via le player Spotify officiel (compte comme un vrai stream). Aucun fichier audio à uploader.</p>
             </Field>
+            <Field label="Audio (optionnel, mp3/wav)" full><div className="flex gap-2"><Input value={form.audio_url} onChange={(e) => setForm({ ...form, audio_url: e.target.value })} placeholder="Laisser vide si Spotify renseigné" /><UploadButton accept="audio/*" folder="audio" onUploaded={(url) => setForm((f) => ({ ...f, audio_url: url }))} /></div></Field>
+            <Field label="Clip vidéo (URL YouTube/mp4)" full><div className="flex gap-2"><Input value={form.video_url} onChange={(e) => setForm({ ...form, video_url: e.target.value })} /><UploadButton accept="video/*" folder="videos" onUploaded={(url) => setForm((f) => ({ ...f, video_url: url }))} /></div></Field>
             <Field label="Pochette"><div className="flex gap-2"><Input value={form.cover_url} onChange={(e) => setForm({ ...form, cover_url: e.target.value })} /><UploadButton accept="image/*" folder="covers" onUploaded={(url) => setForm((f) => ({ ...f, cover_url: url }))} /></div></Field>
             <Field label="Année"><Input type="number" value={form.release_year} onChange={(e) => setForm({ ...form, release_year: e.target.value })} /></Field>
             <FormActions editing={!!editingId} saving={saving} onCancel={cancel} />

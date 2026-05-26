@@ -4,7 +4,7 @@ export type PlayableTrack = {
   id: string;
   title: string;
   artist: string;
-  audio_url: string;
+  audio_url?: string | null;
   cover_url?: string | null;
   spotify_url?: string | null;
 };
@@ -89,6 +89,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const play = (track: PlayableTrack) => {
     const a = audioRef.current;
     if (!a) return;
+    // Spotify-only track: no native audio, the visible Spotify embed handles playback
+    if (!track.audio_url) {
+      a.pause();
+      a.removeAttribute("src");
+      setCurrent(track);
+      setProgress(0);
+      setPlaying(true);
+      return;
+    }
     if (current?.id === track.id) {
       a.play();
       return;
@@ -101,6 +110,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     a.play().catch(() => setPlaying(false));
   };
   const toggle = () => {
+    if (current && !current.audio_url) {
+      // Spotify embed manages its own state; just flip the flag so the UI re-mounts the iframe
+      setPlaying((p) => !p);
+      return;
+    }
     const a = audioRef.current;
     if (!a || !current) return;
     if (a.paused) a.play();
