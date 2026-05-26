@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/watchlist")({
   component: WatchlistPage,
-  head: () => ({ meta: [{ title: "Ma liste — Lumière" }] }),
+  head: () => ({ meta: [{ title: "Ma liste — 416 Records" }] }),
 });
 
 function WatchlistPage() {

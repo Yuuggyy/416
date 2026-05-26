@@ -73,7 +73,7 @@ function Landing({ onCTA }: { onCTA: () => void }) {
       <header className="relative z-10 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
           <Film className="h-7 w-7 text-primary" />
-          <span className="font-display text-3xl font-bold text-gradient-gold">Lumière</span>
+          <span className="font-display text-3xl font-bold text-gradient-gold">416 Records</span>
         </div>
         <Button onClick={onCTA} size="sm">Connexion</Button>
       </header>
@@ -87,7 +87,7 @@ function Landing({ onCTA }: { onCTA: () => void }) {
           <span className="text-gradient-gold">une seule maison.</span>
         </h1>
         <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-          Découvrez les films, les artistes et le merch officiel de Lumière. Tout l'univers du label, en un seul endroit.
+          Découvrez les films, les artistes et le merch officiel de 416 Records. Tout l'univers du label, en un seul endroit.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Button size="lg" onClick={onCTA} className="font-semibold text-base px-8 shadow-gold-glow">

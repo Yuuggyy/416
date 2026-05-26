@@ -11,7 +11,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/account")({
   component: AccountPage,
-  head: () => ({ meta: [{ title: "Mon compte — Lumière" }] }),
+  head: () => ({ meta: [{ title: "Mon compte — 416 Records" }] }),
 });
 
 function AccountPage() {

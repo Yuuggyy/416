@@ -53,6 +53,7 @@ export type Track = {
   duration_seconds: number | null;
   release_year: number | null;
   created_at: string;
+  spotify_url?: string | null;
 };
 
 export type Merch = {

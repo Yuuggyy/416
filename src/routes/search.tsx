@@ -9,7 +9,7 @@ import { Loader2, Search as SearchIcon } from "lucide-react";
 
 export const Route = createFileRoute("/search")({
   component: SearchPage,
-  head: () => ({ meta: [{ title: "Rechercher — Lumière" }] }),
+  head: () => ({ meta: [{ title: "Rechercher — 416 Records" }] }),
 });
 
 function SearchPage() {

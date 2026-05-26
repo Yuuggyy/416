@@ -11,6 +11,9 @@ import {
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
+import { AppSettingsProvider } from "@/lib/app-settings";
+import { PlayerProvider } from "@/lib/player";
+import { MiniPlayer } from "@/components/MiniPlayer";
 
 function NotFoundComponent() {
   return (
@@ -66,8 +69,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lumière — Streaming illimité" },
-      { name: "description", content: "Films et séries en streaming, partout, sans limite." },
+      { title: "416 Records — Label, films & musique" },
+      { name: "description", content: "416 Records — la maison de production. Films, musique et merch en un seul endroit." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -104,8 +107,13 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Outlet />
-        <Toaster />
+        <AppSettingsProvider>
+          <PlayerProvider>
+            <Outlet />
+            <MiniPlayer />
+            <Toaster />
+          </PlayerProvider>
+        </AppSettingsProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

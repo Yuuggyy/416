@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
-  head: () => ({ meta: [{ title: "Connexion — Lumière" }] }),
+  head: () => ({ meta: [{ title: "Connexion — 416 Records" }] }),
 });
 
 function LoginPage() {
@@ -49,7 +49,7 @@ function LoginPage() {
       <div className="relative z-10 w-full max-w-md">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
           <Film className="h-8 w-8 text-primary" />
-          <span className="font-display text-3xl font-bold text-gradient-gold">Lumière</span>
+          <span className="font-display text-3xl font-bold text-gradient-gold">416 Records</span>
         </Link>
         <div className="bg-card/80 backdrop-blur-md border border-border rounded-xl p-8 shadow-gold-glow">
           <h1 className="font-display text-3xl font-bold mb-1">

@@ -9,12 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Pencil, Trash2, Plus, Upload, Film, Music, ShoppingBag } from "lucide-react";
+import { Loader2, Pencil, Trash2, Plus, Upload, Film, Music, ShoppingBag, Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useAppSettings } from "@/lib/app-settings";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
-  head: () => ({ meta: [{ title: "Admin — Lumière" }] }),
+  head: () => ({ meta: [{ title: "Admin — 416 Records" }] }),
 });
 
 function AdminPage() {
@@ -46,12 +47,14 @@ function AdminPage() {
             <TabsTrigger value="artists" className="gap-2"><Music className="h-4 w-4" /> Artistes</TabsTrigger>
             <TabsTrigger value="tracks" className="gap-2"><Music className="h-4 w-4" /> Titres</TabsTrigger>
             <TabsTrigger value="merch" className="gap-2"><ShoppingBag className="h-4 w-4" /> Boutique</TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2"><SettingsIcon className="h-4 w-4" /> Apparence</TabsTrigger>
           </TabsList>
 
           <TabsContent value="movies"><MoviesAdmin /></TabsContent>
           <TabsContent value="artists"><ArtistsAdmin /></TabsContent>
           <TabsContent value="tracks"><TracksAdmin /></TabsContent>
           <TabsContent value="merch"><MerchAdmin /></TabsContent>
+          <TabsContent value="settings"><SettingsAdmin /></TabsContent>
         </Tabs>
       </main>
     </div>
@@ -201,8 +204,8 @@ function ArtistsAdmin() {
 }
 
 /* ============== TRACKS ============== */
-type TrackForm = { artist_id: string; title: string; audio_url: string; video_url: string; cover_url: string; release_year: string; };
-const emptyTrack: TrackForm = { artist_id: "", title: "", audio_url: "", video_url: "", cover_url: "", release_year: "" };
+type TrackForm = { artist_id: string; title: string; audio_url: string; video_url: string; cover_url: string; release_year: string; spotify_url: string; };
+const emptyTrack: TrackForm = { artist_id: "", title: "", audio_url: "", video_url: "", cover_url: "", release_year: "", spotify_url: "" };
 
 function TracksAdmin() {
   const [list, setList] = useState<(Track & { artist?: { name: string } })[]>([]);
@@ -224,7 +227,7 @@ function TracksAdmin() {
 
   const startEdit = (t: Track) => {
     setEditingId(t.id);
-    setForm({ artist_id: t.artist_id, title: t.title, audio_url: t.audio_url, video_url: t.video_url ?? "", cover_url: t.cover_url ?? "", release_year: t.release_year?.toString() ?? "" });
+    setForm({ artist_id: t.artist_id, title: t.title, audio_url: t.audio_url, video_url: t.video_url ?? "", cover_url: t.cover_url ?? "", release_year: t.release_year?.toString() ?? "", spotify_url: t.spotify_url ?? "" });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   const cancel = () => { setEditingId(null); setForm(emptyTrack); };
@@ -233,7 +236,7 @@ function TracksAdmin() {
     e.preventDefault();
     if (!form.artist_id || !form.title || !form.audio_url) { toast.error("Artiste, titre et audio requis"); return; }
     setSaving(true);
-    const payload = { artist_id: form.artist_id, title: form.title, audio_url: form.audio_url, video_url: form.video_url || null, cover_url: form.cover_url || null, release_year: form.release_year ? parseInt(form.release_year) : null };
+    const payload = { artist_id: form.artist_id, title: form.title, audio_url: form.audio_url, video_url: form.video_url || null, cover_url: form.cover_url || null, release_year: form.release_year ? parseInt(form.release_year) : null, spotify_url: form.spotify_url || null };
     const { error } = editingId ? await supabase.from("tracks").update(payload).eq("id", editingId) : await supabase.from("tracks").insert(payload);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
@@ -263,6 +266,10 @@ function TracksAdmin() {
             <Field label="Titre *"><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></Field>
             <Field label="Audio * (mp3, wav…)" full><div className="flex gap-2"><Input value={form.audio_url} onChange={(e) => setForm({ ...form, audio_url: e.target.value })} required /><UploadButton accept="audio/*" folder="audio" onUploaded={(url) => setForm((f) => ({ ...f, audio_url: url }))} /></div></Field>
             <Field label="Clip vidéo (URL YouTube/mp4)" full><div className="flex gap-2"><Input value={form.video_url} onChange={(e) => setForm({ ...form, video_url: e.target.value })} /><UploadButton accept="video/*" folder="videos" onUploaded={(url) => setForm((f) => ({ ...f, video_url: url }))} /></div></Field>
+            <Field label="Lien Spotify (titre)" full>
+              <Input value={form.spotify_url} onChange={(e) => setForm({ ...form, spotify_url: e.target.value })} placeholder="https://open.spotify.com/track/..." />
+              <p className="text-xs text-muted-foreground mt-1">Quand ce lien est renseigné, l'écoute dans l'app déclenche aussi un vrai stream Spotify via le lecteur intégré.</p>
+            </Field>
             <Field label="Pochette"><div className="flex gap-2"><Input value={form.cover_url} onChange={(e) => setForm({ ...form, cover_url: e.target.value })} /><UploadButton accept="image/*" folder="covers" onUploaded={(url) => setForm((f) => ({ ...f, cover_url: url }))} /></div></Field>
             <Field label="Année"><Input type="number" value={form.release_year} onChange={(e) => setForm({ ...form, release_year: e.target.value })} /></Field>
             <FormActions editing={!!editingId} saving={saving} onCancel={cancel} />
@@ -427,5 +434,56 @@ function UploadButton({ accept, folder, onUploaded }: { accept: string; folder: 
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
       </Button>
     </>
+  );
+}
+
+/* ============== SETTINGS ============== */
+function SettingsAdmin() {
+  const { settings, update } = useAppSettings();
+  const [name, setName] = useState(settings.app_name);
+  const [logo, setLogo] = useState(settings.logo_url);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => { setName(settings.app_name); setLogo(settings.logo_url); }, [settings.app_name, settings.logo_url]);
+
+  const save = async (e: FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await update("app_name", name);
+      await update("logo_url", logo);
+      toast.success("Apparence mise à jour");
+    } catch (err: any) {
+      toast.error(err.message ?? "Erreur");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <FormCard title="Identité de l'app" icon={<Plus className="h-5 w-5 text-primary" />}>
+        <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field label="Nom de l'app" full>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="416 Records" />
+          </Field>
+          <Field label="Logo (URL ou upload)" full>
+            <div className="flex gap-2">
+              <Input value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://..." />
+              <UploadButton accept="image/*" folder="branding" onUploaded={(url) => setLogo(url)} />
+            </div>
+            {logo && (
+              <div className="mt-3 flex items-center gap-3">
+                <img src={logo} alt="Logo" className="h-16 w-16 rounded object-cover border border-border" />
+                <span className="text-xs text-muted-foreground">Aperçu du logo</span>
+              </div>
+            )}
+          </Field>
+          <div className="md:col-span-2">
+            <Button type="submit" disabled={saving}>{saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}Enregistrer</Button>
+          </div>
+        </form>
+      </FormCard>
+    </div>
   );
 }

@@ -7,7 +7,7 @@ import { Loader2, Music } from "lucide-react";
 
 export const Route = createFileRoute("/artists")({
   component: ArtistsPage,
-  head: () => ({ meta: [{ title: "Artistes — Lumière" }] }),
+  head: () => ({ meta: [{ title: "Artistes — 416 Records" }] }),
 });
 
 function ArtistsPage() {
@@ -34,7 +34,7 @@ function ArtistsPage() {
         <div className="mb-10">
           <span className="text-xs uppercase tracking-[0.3em] text-primary">Notre roster</span>
           <h1 className="font-display text-4xl sm:text-5xl font-bold mt-2">Artistes du label</h1>
-          <p className="text-muted-foreground mt-2 max-w-2xl">Découvrez les voix de la maison Lumière. Musique, clips et exclusivités.</p>
+          <p className="text-muted-foreground mt-2 max-w-2xl">Découvrez les voix de la maison 416 Records. Musique, clips et exclusivités.</p>
         </div>
 
         {artists.length === 0 ? (

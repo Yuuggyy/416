@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase, type Artist, type Track, type Merch } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Loader2, Music, Play, Pause, Film as FilmIcon, ShoppingBag } from "lucide-react";
+import { usePlayer } from "@/lib/player";
 
 export const Route = createFileRoute("/artists/$id")({
   component: ArtistDetail,
@@ -18,8 +19,7 @@ function ArtistDetail() {
   const [tracks, setTracks] = useState<Track[]>([]);
   const [merch, setMerch] = useState<Merch[]>([]);
   const [loading, setLoading] = useState(true);
-  const [playingId, setPlayingId] = useState<string | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { current, playing, play, toggle } = usePlayer();
 
   useEffect(() => {
     if (authLoading) return;
@@ -37,21 +37,20 @@ function ArtistDetail() {
     })();
   }, [id, user, authLoading, navigate]);
 
-  const toggle = (track: Track) => {
-    if (playingId === track.id) {
-      audioRef.current?.pause();
-      setPlayingId(null);
+  const handlePlay = (t: Track) => {
+    if (current?.id === t.id) {
+      toggle();
     } else {
-      if (audioRef.current) audioRef.current.pause();
-      const a = new Audio(track.audio_url);
-      audioRef.current = a;
-      a.play();
-      a.onended = () => setPlayingId(null);
-      setPlayingId(track.id);
+      play({
+        id: t.id,
+        title: t.title,
+        artist: artist?.name ?? "",
+        audio_url: t.audio_url,
+        cover_url: t.cover_url ?? artist?.photo_url ?? null,
+        spotify_url: t.spotify_url ?? null,
+      });
     }
   };
-
-  useEffect(() => () => { audioRef.current?.pause(); }, []);
 
   if (authLoading || loading) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -111,8 +110,8 @@ function ArtistDetail() {
                   {t.video_url && (
                     <Button asChild size="sm" variant="ghost"><a href={t.video_url} target="_blank" rel="noreferrer"><FilmIcon className="h-4 w-4" /></a></Button>
                   )}
-                  <Button size="icon" variant={playingId === t.id ? "default" : "secondary"} onClick={() => toggle(t)} className="rounded-full h-10 w-10">
-                    {playingId === t.id ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
+                  <Button size="icon" variant={current?.id === t.id ? "default" : "secondary"} onClick={() => handlePlay(t)} className="rounded-full h-10 w-10">
+                    {current?.id === t.id && playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
                   </Button>
                 </div>
               ))}
