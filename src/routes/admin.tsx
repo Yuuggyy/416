@@ -436,3 +436,54 @@ function UploadButton({ accept, folder, onUploaded }: { accept: string; folder: 
     </>
   );
 }
+
+/* ============== SETTINGS ============== */
+function SettingsAdmin() {
+  const { settings, update } = useAppSettings();
+  const [name, setName] = useState(settings.app_name);
+  const [logo, setLogo] = useState(settings.logo_url);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => { setName(settings.app_name); setLogo(settings.logo_url); }, [settings.app_name, settings.logo_url]);
+
+  const save = async (e: FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    try {
+      await update("app_name", name);
+      await update("logo_url", logo);
+      toast.success("Apparence mise à jour");
+    } catch (err: any) {
+      toast.error(err.message ?? "Erreur");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <FormCard title="Identité de l'app" icon={<Plus className="h-5 w-5 text-primary" />}>
+        <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field label="Nom de l'app" full>
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="416 Records" />
+          </Field>
+          <Field label="Logo (URL ou upload)" full>
+            <div className="flex gap-2">
+              <Input value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://..." />
+              <UploadButton accept="image/*" folder="branding" onUploaded={(url) => setLogo(url)} />
+            </div>
+            {logo && (
+              <div className="mt-3 flex items-center gap-3">
+                <img src={logo} alt="Logo" className="h-16 w-16 rounded object-cover border border-border" />
+                <span className="text-xs text-muted-foreground">Aperçu du logo</span>
+              </div>
+            )}
+          </Field>
+          <div className="md:col-span-2">
+            <Button type="submit" disabled={saving}>{saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}Enregistrer</Button>
+          </div>
+        </form>
+      </FormCard>
+    </div>
+  );
+}
