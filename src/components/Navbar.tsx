@@ -2,8 +2,9 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Film, Search, User as UserIcon } from "lucide-react";
+import { LogOut, Settings, Film, Search, User as UserIcon, Sun, Moon } from "lucide-react";
 import { useAppSettings } from "@/lib/app-settings";
+import { useTheme } from "@/lib/theme";
 
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
