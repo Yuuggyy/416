@@ -37,7 +37,7 @@ export function Navbar() {
             ) : (
               <Film className="h-6 w-6 text-primary" />
             )}
-            <span className="font-display text-2xl font-bold text-gradient-gold tracking-wide">{settings.app_name || "416 Records"}</span>
+            <span className="font-display text-3xl text-foreground tracking-wide">{settings.app_name || "416"}</span>
           </Link>
           {user && (
             <nav className="hidden md:flex items-center gap-6 text-sm">
