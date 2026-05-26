@@ -234,9 +234,10 @@ function TracksAdmin() {
 
   const save = async (e: FormEvent) => {
     e.preventDefault();
-    if (!form.artist_id || !form.title || !form.audio_url) { toast.error("Artiste, titre et audio requis"); return; }
+    if (!form.artist_id || !form.title) { toast.error("Artiste et titre requis"); return; }
+    if (!form.audio_url && !form.spotify_url) { toast.error("Renseigne soit un fichier audio, soit un lien Spotify"); return; }
     setSaving(true);
-    const payload = { artist_id: form.artist_id, title: form.title, audio_url: form.audio_url, video_url: form.video_url || null, cover_url: form.cover_url || null, release_year: form.release_year ? parseInt(form.release_year) : null, spotify_url: form.spotify_url || null };
+    const payload = { artist_id: form.artist_id, title: form.title, audio_url: form.audio_url || "", video_url: form.video_url || null, cover_url: form.cover_url || null, release_year: form.release_year ? parseInt(form.release_year) : null, spotify_url: form.spotify_url || null };
     const { error } = editingId ? await supabase.from("tracks").update(payload).eq("id", editingId) : await supabase.from("tracks").insert(payload);
     setSaving(false);
     if (error) { toast.error(error.message); return; }
