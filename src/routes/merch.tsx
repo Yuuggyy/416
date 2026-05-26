@@ -8,7 +8,7 @@ import { Loader2, ShoppingBag, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/merch")({
   component: MerchPage,
-  head: () => ({ meta: [{ title: "Boutique — Lumière" }] }),
+  head: () => ({ meta: [{ title: "Boutique — 416 Records" }] }),
 });
 
 function MerchPage() {
@@ -39,7 +39,7 @@ function MerchPage() {
         <div className="mb-10">
           <span className="text-xs uppercase tracking-[0.3em] text-primary">Édition limitée</span>
           <h1 className="font-display text-4xl sm:text-5xl font-bold mt-2">Boutique officielle</h1>
-          <p className="text-muted-foreground mt-2 max-w-2xl">Le merch officiel de la maison Lumière et de ses artistes.</p>
+          <p className="text-muted-foreground mt-2 max-w-2xl">Le merch officiel de la maison 416 Records et de ses artistes.</p>
         </div>
 
         {cats.length > 1 && (

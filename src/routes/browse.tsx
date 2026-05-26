@@ -9,7 +9,7 @@ import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/browse")({
   component: BrowsePage,
-  head: () => ({ meta: [{ title: "Parcourir — Lumière" }] }),
+  head: () => ({ meta: [{ title: "Parcourir — 416 Records" }] }),
 });
 
 function BrowsePage() {
