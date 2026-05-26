@@ -3,9 +3,11 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { LogOut, Settings, Film, Search, User as UserIcon } from "lucide-react";
+import { useAppSettings } from "@/lib/app-settings";
 
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
+  const { settings } = useAppSettings();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [scrolled, setScrolled] = useState(false);
@@ -28,8 +30,12 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
         <div className="flex items-center gap-8">
           <Link to="/" className="flex items-center gap-2">
-            <Film className="h-6 w-6 text-primary" />
-            <span className="font-display text-2xl font-bold text-gradient-gold tracking-wide">Lumière</span>
+            {settings.logo_url ? (
+              <img src={settings.logo_url} alt={settings.app_name} className="h-8 w-8 rounded object-cover" />
+            ) : (
+              <Film className="h-6 w-6 text-primary" />
+            )}
+            <span className="font-display text-2xl font-bold text-gradient-gold tracking-wide">{settings.app_name || "416 Records"}</span>
           </Link>
           {user && (
             <nav className="hidden md:flex items-center gap-6 text-sm">
