@@ -9,12 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Pencil, Trash2, Plus, Upload, Film, Music, ShoppingBag } from "lucide-react";
+import { Loader2, Pencil, Trash2, Plus, Upload, Film, Music, ShoppingBag, Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
+import { useAppSettings } from "@/lib/app-settings";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
-  head: () => ({ meta: [{ title: "Admin — Lumière" }] }),
+  head: () => ({ meta: [{ title: "Admin — 416 Records" }] }),
 });
 
 function AdminPage() {
@@ -46,12 +47,14 @@ function AdminPage() {
             <TabsTrigger value="artists" className="gap-2"><Music className="h-4 w-4" /> Artistes</TabsTrigger>
             <TabsTrigger value="tracks" className="gap-2"><Music className="h-4 w-4" /> Titres</TabsTrigger>
             <TabsTrigger value="merch" className="gap-2"><ShoppingBag className="h-4 w-4" /> Boutique</TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2"><SettingsIcon className="h-4 w-4" /> Apparence</TabsTrigger>
           </TabsList>
 
           <TabsContent value="movies"><MoviesAdmin /></TabsContent>
           <TabsContent value="artists"><ArtistsAdmin /></TabsContent>
           <TabsContent value="tracks"><TracksAdmin /></TabsContent>
           <TabsContent value="merch"><MerchAdmin /></TabsContent>
+          <TabsContent value="settings"><SettingsAdmin /></TabsContent>
         </Tabs>
       </main>
     </div>
