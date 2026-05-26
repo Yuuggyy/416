@@ -4,7 +4,7 @@ export type PlayableTrack = {
   id: string;
   title: string;
   artist: string;
-  audio_url: string;
+  audio_url?: string | null;
   cover_url?: string | null;
   spotify_url?: string | null;
 };
