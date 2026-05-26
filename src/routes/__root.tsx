@@ -14,6 +14,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AppSettingsProvider } from "@/lib/app-settings";
 import { PlayerProvider } from "@/lib/player";
 import { MiniPlayer } from "@/components/MiniPlayer";
+import { ThemeProvider } from "@/lib/theme";
 
 function NotFoundComponent() {
   return (
