@@ -33,35 +33,68 @@
   --font-display: var(--font-display);
 }
 
-:root {
+/* ============== DARK (default) — black + nuanced purple ============== */
+:root,
+.dark {
   --radius: 0.5rem;
-  --background: oklch(0.13 0 0);
+  --background: oklch(0.11 0.005 290);
   --foreground: oklch(0.98 0 0);
-  --card: oklch(0.17 0 0);
+  --card: oklch(0.15 0.01 290);
   --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.15 0 0);
+  --popover: oklch(0.13 0.008 290);
   --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.78 0.13 85);
-  --primary-foreground: oklch(0.13 0 0);
-  --secondary: oklch(0.22 0 0);
+
+  /* Purple nuancé tirant vers le noir — accent principal */
+  --primary: oklch(0.52 0.18 295);
+  --primary-foreground: oklch(0.98 0 0);
+  --primary-glow: oklch(0.65 0.22 295);
+
+  --secondary: oklch(0.2 0.015 290);
   --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.22 0 0);
-  --muted-foreground: oklch(0.68 0 0);
-  --accent: oklch(0.86 0.11 90);
-  --accent-foreground: oklch(0.13 0 0);
+  --muted: oklch(0.2 0.01 290);
+  --muted-foreground: oklch(0.7 0.01 290);
+  --accent: oklch(0.4 0.14 295);
+  --accent-foreground: oklch(0.98 0 0);
   --destructive: oklch(0.6 0.22 27);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.25 0 0);
-  --input: oklch(0.22 0 0);
-  --ring: oklch(0.78 0.13 85);
-  --gold: oklch(0.78 0.13 85);
-  --gold-soft: oklch(0.88 0.09 92);
-  --font-display: "Playfair Display", Georgia, serif;
+  --border: oklch(0.25 0.015 290);
+  --input: oklch(0.2 0.015 290);
+  --ring: oklch(0.52 0.18 295);
+
+  /* Backwards-compat aliases (anciennes utilities -gold) */
+  --gold: oklch(0.52 0.18 295);
+  --gold-soft: oklch(0.75 0.18 295);
+
+  --font-display: "Rubik Wet Paint", "Permanent Marker", Impact, sans-serif;
 }
 
-.dark {
-  --background: oklch(0.13 0 0);
-  --foreground: oklch(0.98 0 0);
+/* ============== LIGHT — blanc + violet nuancé ============== */
+.light {
+  --background: oklch(0.99 0 0);
+  --foreground: oklch(0.13 0.01 290);
+  --card: oklch(0.97 0.003 290);
+  --card-foreground: oklch(0.13 0.01 290);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.13 0.01 290);
+
+  --primary: oklch(0.42 0.18 295);
+  --primary-foreground: oklch(0.99 0 0);
+  --primary-glow: oklch(0.55 0.22 295);
+
+  --secondary: oklch(0.94 0.005 290);
+  --secondary-foreground: oklch(0.13 0.01 290);
+  --muted: oklch(0.94 0.005 290);
+  --muted-foreground: oklch(0.42 0.01 290);
+  --accent: oklch(0.9 0.04 295);
+  --accent-foreground: oklch(0.2 0.05 295);
+  --destructive: oklch(0.55 0.22 27);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.9 0.005 290);
+  --input: oklch(0.92 0.005 290);
+  --ring: oklch(0.42 0.18 295);
+
+  --gold: oklch(0.42 0.18 295);
+  --gold-soft: oklch(0.55 0.22 295);
 }
 
 @layer base {
@@ -73,24 +106,39 @@
     color: var(--color-foreground);
     font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.02em;
+  }
 }
 
 @layer utilities {
+  /* Conserve le nom historique mais rend désormais un dégradé violet */
   .text-gradient-gold {
-    background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+    background: linear-gradient(135deg, var(--primary-glow), var(--primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .text-gradient-purple {
+    background: linear-gradient(135deg, var(--primary-glow), var(--primary));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
   }
   .bg-cinema-fade {
-    background: linear-gradient(180deg, transparent 0%, oklch(0.13 0 0 / 0.4) 40%, oklch(0.13 0 0) 100%);
+    background: linear-gradient(180deg, transparent 0%, var(--background) 100%);
   }
   .bg-cinema-side {
-    background: linear-gradient(90deg, oklch(0.13 0 0) 0%, oklch(0.13 0 0 / 0.7) 50%, transparent 100%);
+    background: linear-gradient(90deg, var(--background) 0%, color-mix(in oklab, var(--background) 70%, transparent) 50%, transparent 100%);
   }
   .shadow-gold-glow {
-    box-shadow: 0 10px 40px -10px oklch(0.78 0.13 85 / 0.5);
+    box-shadow: 0 10px 40px -10px color-mix(in oklab, var(--primary) 55%, transparent);
+  }
+  .shadow-purple-glow {
+    box-shadow: 0 10px 40px -10px color-mix(in oklab, var(--primary) 55%, transparent);
   }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { scrollbar-width: none; }

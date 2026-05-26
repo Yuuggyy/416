@@ -14,6 +14,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AppSettingsProvider } from "@/lib/app-settings";
 import { PlayerProvider } from "@/lib/player";
 import { MiniPlayer } from "@/components/MiniPlayer";
+import { ThemeProvider } from "@/lib/theme";
 
 function NotFoundComponent() {
   return (
@@ -78,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Rubik+Wet+Paint&family=Permanent+Marker&family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
   }),
@@ -106,15 +107,17 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AppSettingsProvider>
-          <PlayerProvider>
-            <Outlet />
-            <MiniPlayer />
-            <Toaster />
-          </PlayerProvider>
-        </AppSettingsProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppSettingsProvider>
+            <PlayerProvider>
+              <Outlet />
+              <MiniPlayer />
+              <Toaster />
+            </PlayerProvider>
+          </AppSettingsProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

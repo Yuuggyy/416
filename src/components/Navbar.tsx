@@ -2,12 +2,14 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Film, Search, User as UserIcon } from "lucide-react";
+import { LogOut, Settings, Film, Search, User as UserIcon, Sun, Moon } from "lucide-react";
 import { useAppSettings } from "@/lib/app-settings";
+import { useTheme } from "@/lib/theme";
 
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
   const { settings } = useAppSettings();
+  const { theme, toggle: toggleTheme } = useTheme();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [scrolled, setScrolled] = useState(false);
@@ -35,7 +37,7 @@ export function Navbar() {
             ) : (
               <Film className="h-6 w-6 text-primary" />
             )}
-            <span className="font-display text-2xl font-bold text-gradient-gold tracking-wide">{settings.app_name || "416 Records"}</span>
+            <span className="font-display text-3xl text-foreground tracking-wide">{settings.app_name || "416"}</span>
           </Link>
           {user && (
             <nav className="hidden md:flex items-center gap-6 text-sm">
@@ -54,6 +56,14 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
           {user ? (
             <>
               <Button asChild variant="ghost" size="sm" aria-label="Rechercher"><Link to="/search"><Search className="h-4 w-4" /></Link></Button>
