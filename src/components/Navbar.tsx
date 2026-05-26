@@ -56,6 +56,14 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
           {user ? (
             <>
               <Button asChild variant="ghost" size="sm" aria-label="Rechercher"><Link to="/search"><Search className="h-4 w-4" /></Link></Button>
