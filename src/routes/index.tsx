@@ -79,19 +79,19 @@ function Landing({ onCTA }: { onCTA: () => void }) {
       </header>
       <main className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-32 text-center">
         <span className="inline-block text-xs uppercase tracking-[0.3em] text-primary mb-6">
-          Cinéma à la maison
+          Maison de production
         </span>
         <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl font-bold leading-[1.05] mb-6">
-          Le grand écran,
+          Films, musique,
           <br />
-          <span className="text-gradient-gold">dans votre salon.</span>
+          <span className="text-gradient-gold">une seule maison.</span>
         </h1>
         <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-          Films et séries soigneusement sélectionnés. Diffusion illimitée, sans publicité.
+          Découvrez les films, les artistes et le merch officiel de Lumière. Tout l'univers du label, en un seul endroit.
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Button size="lg" onClick={onCTA} className="font-semibold text-base px-8 shadow-gold-glow">
-            Commencer
+            Entrer dans l'univers
           </Button>
           <Button size="lg" variant="secondary" asChild>
             <Link to="/login">Déjà membre ?</Link>
