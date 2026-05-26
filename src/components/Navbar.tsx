@@ -9,6 +9,7 @@ import { useTheme } from "@/lib/theme";
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
   const { settings } = useAppSettings();
+  const { theme, toggle: toggleTheme } = useTheme();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [scrolled, setScrolled] = useState(false);
