@@ -11,12 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WatchlistRouteImport } from './routes/watchlist'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as MerchRouteImport } from './routes/merch'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as BrowseRouteImport } from './routes/browse'
+import { Route as ArtistsRouteImport } from './routes/artists'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WatchIdRouteImport } from './routes/watch.$id'
+import { Route as ArtistsIdRouteImport } from './routes/artists.$id'
 
 const WatchlistRoute = WatchlistRouteImport.update({
   id: '/watchlist',
@@ -28,6 +31,11 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -36,6 +44,11 @@ const LoginRoute = LoginRouteImport.update({
 const BrowseRoute = BrowseRouteImport.update({
   id: '/browse',
   path: '/browse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArtistsRoute = ArtistsRouteImport.update({
+  id: '/artists',
+  path: '/artists',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -58,25 +71,36 @@ const WatchIdRoute = WatchIdRouteImport.update({
   path: '/watch/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ArtistsIdRoute = ArtistsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => ArtistsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/artists': typeof ArtistsRouteWithChildren
   '/browse': typeof BrowseRoute
   '/login': typeof LoginRoute
+  '/merch': typeof MerchRoute
   '/search': typeof SearchRoute
   '/watchlist': typeof WatchlistRoute
+  '/artists/$id': typeof ArtistsIdRoute
   '/watch/$id': typeof WatchIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/artists': typeof ArtistsRouteWithChildren
   '/browse': typeof BrowseRoute
   '/login': typeof LoginRoute
+  '/merch': typeof MerchRoute
   '/search': typeof SearchRoute
   '/watchlist': typeof WatchlistRoute
+  '/artists/$id': typeof ArtistsIdRoute
   '/watch/$id': typeof WatchIdRoute
 }
 export interface FileRoutesById {
@@ -84,10 +108,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
+  '/artists': typeof ArtistsRouteWithChildren
   '/browse': typeof BrowseRoute
   '/login': typeof LoginRoute
+  '/merch': typeof MerchRoute
   '/search': typeof SearchRoute
   '/watchlist': typeof WatchlistRoute
+  '/artists/$id': typeof ArtistsIdRoute
   '/watch/$id': typeof WatchIdRoute
 }
 export interface FileRouteTypes {
@@ -96,30 +123,39 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
+    | '/artists'
     | '/browse'
     | '/login'
+    | '/merch'
     | '/search'
     | '/watchlist'
+    | '/artists/$id'
     | '/watch/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/account'
     | '/admin'
+    | '/artists'
     | '/browse'
     | '/login'
+    | '/merch'
     | '/search'
     | '/watchlist'
+    | '/artists/$id'
     | '/watch/$id'
   id:
     | '__root__'
     | '/'
     | '/account'
     | '/admin'
+    | '/artists'
     | '/browse'
     | '/login'
+    | '/merch'
     | '/search'
     | '/watchlist'
+    | '/artists/$id'
     | '/watch/$id'
   fileRoutesById: FileRoutesById
 }
@@ -127,8 +163,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
+  ArtistsRoute: typeof ArtistsRouteWithChildren
   BrowseRoute: typeof BrowseRoute
   LoginRoute: typeof LoginRoute
+  MerchRoute: typeof MerchRoute
   SearchRoute: typeof SearchRoute
   WatchlistRoute: typeof WatchlistRoute
   WatchIdRoute: typeof WatchIdRoute
@@ -150,6 +188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -162,6 +207,13 @@ declare module '@tanstack/react-router' {
       path: '/browse'
       fullPath: '/browse'
       preLoaderRoute: typeof BrowseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/artists': {
+      id: '/artists'
+      path: '/artists'
+      fullPath: '/artists'
+      preLoaderRoute: typeof ArtistsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -192,15 +244,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WatchIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/artists/$id': {
+      id: '/artists/$id'
+      path: '/$id'
+      fullPath: '/artists/$id'
+      preLoaderRoute: typeof ArtistsIdRouteImport
+      parentRoute: typeof ArtistsRoute
+    }
   }
 }
+
+interface ArtistsRouteChildren {
+  ArtistsIdRoute: typeof ArtistsIdRoute
+}
+
+const ArtistsRouteChildren: ArtistsRouteChildren = {
+  ArtistsIdRoute: ArtistsIdRoute,
+}
+
+const ArtistsRouteWithChildren =
+  ArtistsRoute._addFileChildren(ArtistsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
+  ArtistsRoute: ArtistsRouteWithChildren,
   BrowseRoute: BrowseRoute,
   LoginRoute: LoginRoute,
+  MerchRoute: MerchRoute,
   SearchRoute: SearchRoute,
   WatchlistRoute: WatchlistRoute,
   WatchIdRoute: WatchIdRoute,
@@ -208,13 +280,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
