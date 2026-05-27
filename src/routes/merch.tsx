@@ -1,6 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { supabase, type Merch } from "@/lib/supabase";
+import { supabase, type Merch, type Artist } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -15,14 +15,23 @@ function MerchPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [items, setItems] = useState<Merch[]>([]);
+  const [artists, setArtists] = useState<Record<string, Artist>>({});
   const [loading, setLoading] = useState(true);
   const [cat, setCat] = useState<string>("Tous");
 
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate({ to: "/login" }); return; }
-    supabase.from("merch").select("*").order("created_at", { ascending: false })
-      .then(({ data }) => { setItems((data as Merch[]) ?? []); setLoading(false); });
+    Promise.all([
+      supabase.from("merch").select("*").order("created_at", { ascending: false }),
+      supabase.from("artists").select("*"),
+    ]).then(([m, a]) => {
+      setItems((m.data as Merch[]) ?? []);
+      const map: Record<string, Artist> = {};
+      ((a.data as Artist[]) ?? []).forEach((x) => { map[x.id] = x; });
+      setArtists(map);
+      setLoading(false);
+    });
   }, [user, authLoading, navigate]);
 
   const cats = useMemo(() => ["Tous", ...Array.from(new Set(items.map((i) => i.category).filter(Boolean) as string[]))], [items]);
@@ -68,6 +77,15 @@ function MerchPage() {
                 </div>
                 <div className="p-4 space-y-1">
                   <h3 className="font-semibold truncate">{m.name}</h3>
+                  {m.artist_id && artists[m.artist_id] && (
+                    <Link
+                      to="/artists/$id"
+                      params={{ id: m.artist_id }}
+                      className="text-xs text-primary hover:underline inline-block"
+                    >
+                      {artists[m.artist_id].name}
+                    </Link>
+                  )}
                   {m.description && <p className="text-xs text-muted-foreground line-clamp-2">{m.description}</p>}
                   <div className="flex items-center justify-between pt-2">
                     {m.price != null ? (
