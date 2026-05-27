@@ -14,10 +14,10 @@ import { Route as SearchRouteImport } from './routes/search'
 import { Route as MerchRouteImport } from './routes/merch'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as BrowseRouteImport } from './routes/browse'
-import { Route as ArtistsRouteImport } from './routes/artists'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ArtistsIndexRouteImport } from './routes/artists.index'
 import { Route as WatchIdRouteImport } from './routes/watch.$id'
 import { Route as ArtistsIdRouteImport } from './routes/artists.$id'
 
@@ -46,11 +46,6 @@ const BrowseRoute = BrowseRouteImport.update({
   path: '/browse',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ArtistsRoute = ArtistsRouteImport.update({
-  id: '/artists',
-  path: '/artists',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -64,6 +59,11 @@ const AccountRoute = AccountRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ArtistsIndexRoute = ArtistsIndexRouteImport.update({
+  id: '/artists/',
+  path: '/artists/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WatchIdRoute = WatchIdRouteImport.update({
@@ -81,7 +81,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
-  '/artists': typeof ArtistsRouteWithChildren
   '/browse': typeof BrowseRoute
   '/login': typeof LoginRoute
   '/merch': typeof MerchRoute
@@ -89,12 +88,12 @@ export interface FileRoutesByFullPath {
   '/watchlist': typeof WatchlistRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/watch/$id': typeof WatchIdRoute
+  '/artists/': typeof ArtistsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
-  '/artists': typeof ArtistsRouteWithChildren
   '/browse': typeof BrowseRoute
   '/login': typeof LoginRoute
   '/merch': typeof MerchRoute
@@ -102,13 +101,13 @@ export interface FileRoutesByTo {
   '/watchlist': typeof WatchlistRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/watch/$id': typeof WatchIdRoute
+  '/artists': typeof ArtistsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
-  '/artists': typeof ArtistsRouteWithChildren
   '/browse': typeof BrowseRoute
   '/login': typeof LoginRoute
   '/merch': typeof MerchRoute
@@ -116,6 +115,7 @@ export interface FileRoutesById {
   '/watchlist': typeof WatchlistRoute
   '/artists/$id': typeof ArtistsIdRoute
   '/watch/$id': typeof WatchIdRoute
+  '/artists/': typeof ArtistsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -123,7 +123,6 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/admin'
-    | '/artists'
     | '/browse'
     | '/login'
     | '/merch'
@@ -131,12 +130,12 @@ export interface FileRouteTypes {
     | '/watchlist'
     | '/artists/$id'
     | '/watch/$id'
+    | '/artists/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/account'
     | '/admin'
-    | '/artists'
     | '/browse'
     | '/login'
     | '/merch'
@@ -144,12 +143,12 @@ export interface FileRouteTypes {
     | '/watchlist'
     | '/artists/$id'
     | '/watch/$id'
+    | '/artists'
   id:
     | '__root__'
     | '/'
     | '/account'
     | '/admin'
-    | '/artists'
     | '/browse'
     | '/login'
     | '/merch'
@@ -157,19 +156,20 @@ export interface FileRouteTypes {
     | '/watchlist'
     | '/artists/$id'
     | '/watch/$id'
+    | '/artists/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
-  ArtistsRoute: typeof ArtistsRouteWithChildren
   BrowseRoute: typeof BrowseRoute
   LoginRoute: typeof LoginRoute
   MerchRoute: typeof MerchRoute
   SearchRoute: typeof SearchRoute
   WatchlistRoute: typeof WatchlistRoute
   WatchIdRoute: typeof WatchIdRoute
+  ArtistsIndexRoute: typeof ArtistsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -209,13 +209,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BrowseRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/artists': {
-      id: '/artists'
-      path: '/artists'
-      fullPath: '/artists'
-      preLoaderRoute: typeof ArtistsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -237,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/artists/': {
+      id: '/artists/'
+      path: '/artists'
+      fullPath: '/artists/'
+      preLoaderRoute: typeof ArtistsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/watch/$id': {
       id: '/watch/$id'
       path: '/watch/$id'
@@ -254,28 +254,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface ArtistsRouteChildren {
-  ArtistsIdRoute: typeof ArtistsIdRoute
-}
-
-const ArtistsRouteChildren: ArtistsRouteChildren = {
-  ArtistsIdRoute: ArtistsIdRoute,
-}
-
-const ArtistsRouteWithChildren =
-  ArtistsRoute._addFileChildren(ArtistsRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
-  ArtistsRoute: ArtistsRouteWithChildren,
   BrowseRoute: BrowseRoute,
   LoginRoute: LoginRoute,
   MerchRoute: MerchRoute,
   SearchRoute: SearchRoute,
   WatchlistRoute: WatchlistRoute,
   WatchIdRoute: WatchIdRoute,
+  ArtistsIndexRoute: ArtistsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

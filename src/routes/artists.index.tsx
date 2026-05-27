@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { Loader2, Music } from "lucide-react";
 
-export const Route = createFileRoute("/artists")({
+export const Route = createFileRoute("/artists/")({
   component: ArtistsPage,
   head: () => ({ meta: [{ title: "Artistes — 416 Records" }] }),
 });
