@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase, type Movie } from "@/lib/supabase";
+import { supabase, type Movie, type Artist } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { HeroBanner } from "@/components/HeroBanner";
 import { MovieRow } from "@/components/MovieRow";
 import { Button } from "@/components/ui/button";
-import { Film, Loader2 } from "lucide-react";
+import { Film, Loader2, Music } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -16,18 +16,19 @@ function Index() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
-    supabase
-      .from("movies")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .then(({ data }) => {
-        setMovies((data as Movie[]) ?? []);
-        setLoading(false);
-      });
+    Promise.all([
+      supabase.from("movies").select("*").order("created_at", { ascending: false }),
+      supabase.from("artists").select("*").order("featured", { ascending: false }).order("created_at", { ascending: false }),
+    ]).then(([m, a]) => {
+      setMovies((m.data as Movie[]) ?? []);
+      setArtists((a.data as Artist[]) ?? []);
+      setLoading(false);
+    });
   }, [user]);
 
   if (authLoading) {
@@ -50,19 +51,55 @@ function Index() {
         <div className="h-screen flex items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      ) : movies.length === 0 ? (
+      ) : movies.length === 0 && artists.length === 0 ? (
         <EmptyState />
       ) : (
         <>
           {hero && <HeroBanner movie={hero} />}
-          <div className="relative z-10 -mt-32 pb-20">
+          <div className="relative z-10 -mt-32 pb-20 space-y-12">
             {categories.map((cat) => (
               <MovieRow key={cat} title={cat} movies={movies.filter((m) => m.category === cat)} />
             ))}
+            {artists.length > 0 && <ArtistsRow artists={artists} />}
           </div>
         </>
       )}
     </div>
+  );
+}
+
+function ArtistsRow({ artists }: { artists: Artist[] }) {
+  return (
+    <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <div className="flex items-end justify-between mb-4">
+        <h2 className="font-display text-2xl sm:text-3xl flex items-center gap-2">
+          <Music className="h-5 w-5 text-primary" /> Artistes du label
+        </h2>
+        <Link to="/artists" className="text-sm text-muted-foreground hover:text-primary">Tout voir →</Link>
+      </div>
+      <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1">
+        {artists.map((a) => (
+          <Link
+            key={a.id}
+            to="/artists/$id"
+            params={{ id: a.id }}
+            className="group flex-shrink-0 w-32 sm:w-36"
+          >
+            <div className="aspect-square rounded-full overflow-hidden bg-secondary border border-border group-hover:border-primary/60 transition-all shadow-lg group-hover:shadow-gold-glow">
+              {a.photo_url ? (
+                <img src={a.photo_url} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center"><Music className="h-8 w-8 text-muted-foreground" /></div>
+              )}
+            </div>
+            <div className="mt-2 text-center">
+              <h3 className="font-semibold text-sm truncate group-hover:text-primary transition-colors">{a.name}</h3>
+              {a.genre && <p className="text-xs text-muted-foreground truncate">{a.genre}</p>}
+            </div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
 
