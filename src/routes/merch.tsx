@@ -77,6 +77,15 @@ function MerchPage() {
                 </div>
                 <div className="p-4 space-y-1">
                   <h3 className="font-semibold truncate">{m.name}</h3>
+                  {m.artist_id && artists[m.artist_id] && (
+                    <Link
+                      to="/artists/$id"
+                      params={{ id: m.artist_id }}
+                      className="text-xs text-primary hover:underline inline-block"
+                    >
+                      {artists[m.artist_id].name}
+                    </Link>
+                  )}
                   {m.description && <p className="text-xs text-muted-foreground line-clamp-2">{m.description}</p>}
                   <div className="flex items-center justify-between pt-2">
                     {m.price != null ? (
