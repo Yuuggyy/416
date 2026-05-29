@@ -72,9 +72,9 @@ const WatchIdRoute = WatchIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArtistsIdRoute = ArtistsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => ArtistsRoute,
+  id: '/artists/$id',
+  path: '/artists/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -168,6 +168,7 @@ export interface RootRouteChildren {
   MerchRoute: typeof MerchRoute
   SearchRoute: typeof SearchRoute
   WatchlistRoute: typeof WatchlistRoute
+  ArtistsIdRoute: typeof ArtistsIdRoute
   WatchIdRoute: typeof WatchIdRoute
   ArtistsIndexRoute: typeof ArtistsIndexRoute
 }
@@ -246,10 +247,10 @@ declare module '@tanstack/react-router' {
     }
     '/artists/$id': {
       id: '/artists/$id'
-      path: '/$id'
+      path: '/artists/$id'
       fullPath: '/artists/$id'
       preLoaderRoute: typeof ArtistsIdRouteImport
-      parentRoute: typeof ArtistsRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -263,6 +264,7 @@ const rootRouteChildren: RootRouteChildren = {
   MerchRoute: MerchRoute,
   SearchRoute: SearchRoute,
   WatchlistRoute: WatchlistRoute,
+  ArtistsIdRoute: ArtistsIdRoute,
   WatchIdRoute: WatchIdRoute,
   ArtistsIndexRoute: ArtistsIndexRoute,
 }
