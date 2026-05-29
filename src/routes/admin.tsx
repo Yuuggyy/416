@@ -63,6 +63,99 @@ function AdminPage() {
   );
 }
 
+/* ============== ORDERS ============== */
+type OrderRow = {
+  id: string;
+  customer_name: string | null;
+  whatsapp: string;
+  items: { id: string; name: string; price: number; quantity: number }[];
+  total: number;
+  currency: string;
+  status: string;
+  notes: string | null;
+  created_at: string;
+};
+
+function OrdersAdmin() {
+  const [list, setList] = useState<OrderRow[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = async () => {
+    setLoading(true);
+    const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+    if (error) toast.error(error.message);
+    setList((data as OrderRow[]) ?? []);
+    setLoading(false);
+  };
+  useEffect(() => { refresh(); }, []);
+
+  const updateStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Statut mis à jour"); refresh();
+  };
+
+  const waLink = (o: OrderRow) => {
+    const num = o.whatsapp.replace(/[^\d]/g, "");
+    const lines = o.items.map((i) => `• ${i.quantity}× ${i.name} (${i.price} ${o.currency})`).join("\n");
+    const msg = `Bonjour ${o.customer_name ?? ""}, 416 Records au sujet de votre commande :\n${lines}\nTotal : ${o.total} ${o.currency}`;
+    return `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+  };
+
+  if (loading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
+
+  return (
+    <div className="space-y-4">
+      <h2 className="font-display text-2xl font-semibold">Commandes ({list.length})</h2>
+      {list.length === 0 && <p className="text-muted-foreground">Aucune commande pour l'instant.</p>}
+      {list.map((o) => (
+        <div key={o.id} className="bg-card border border-border rounded-xl p-4 space-y-3">
+          <div className="flex items-start justify-between gap-2 flex-wrap">
+            <div>
+              <p className="font-semibold">{o.customer_name ?? "Client"}</p>
+              <p className="text-xs text-muted-foreground">{new Date(o.created_at).toLocaleString("fr-FR")}</p>
+              <p className="text-sm mt-1">WhatsApp : <span className="font-mono">{o.whatsapp}</span></p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border ${
+                o.status === "done" ? "border-green-500/40 text-green-500" :
+                o.status === "cancelled" ? "border-destructive/40 text-destructive" :
+                "border-primary/40 text-primary"
+              }`}>{o.status}</span>
+              <select
+                value={o.status}
+                onChange={(e) => updateStatus(o.id, e.target.value)}
+                className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+              >
+                <option value="pending">En attente</option>
+                <option value="contacted">Contacté</option>
+                <option value="done">Terminé</option>
+                <option value="cancelled">Annulé</option>
+              </select>
+            </div>
+          </div>
+          <div className="text-sm space-y-1">
+            {o.items.map((i, idx) => (
+              <div key={idx} className="flex justify-between text-muted-foreground">
+                <span>{i.quantity}× {i.name}</span>
+                <span>{(i.price * i.quantity).toFixed(2)} {o.currency}</span>
+              </div>
+            ))}
+            <div className="flex justify-between font-semibold pt-2 border-t border-border">
+              <span>Total</span><span>{o.total} {o.currency}</span>
+            </div>
+          </div>
+          {o.notes && <p className="text-xs text-muted-foreground italic">Note : {o.notes}</p>}
+          <Button asChild size="sm" className="w-full sm:w-auto">
+            <a href={waLink(o)} target="_blank" rel="noreferrer">
+              <MessageCircle className="h-4 w-4 mr-1" /> Contacter sur WhatsApp
+            </a>
+          </Button>
+        </div>
+      ))}
+    </div>
+  );
+
 /* ============== MOVIES ============== */
 type MovieForm = { title: string; description: string; poster_url: string; backdrop_url: string; video_url: string; category: string; genre: string; year: string; duration_minutes: string; featured: boolean; };
 const emptyMovie: MovieForm = { title: "", description: "", poster_url: "", backdrop_url: "", video_url: "", category: "Tendances", genre: "", year: "", duration_minutes: "", featured: false };
