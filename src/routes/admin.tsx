@@ -155,6 +155,8 @@ function OrdersAdmin() {
       ))}
     </div>
   );
+}
+
 
 /* ============== MOVIES ============== */
 type MovieForm = { title: string; description: string; poster_url: string; backdrop_url: string; video_url: string; category: string; genre: string; year: string; duration_minutes: string; featured: boolean; };
