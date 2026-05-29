@@ -2,14 +2,16 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Film, Search, User as UserIcon, Sun, Moon } from "lucide-react";
+import { LogOut, Settings, Film, Search, User as UserIcon, Sun, Moon, ShoppingCart } from "lucide-react";
 import { useAppSettings } from "@/lib/app-settings";
 import { useTheme } from "@/lib/theme";
+import { useCart } from "@/lib/cart";
 
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
   const { settings } = useAppSettings();
   const { theme, toggle: toggleTheme } = useTheme();
+  const { count: cartCount, open: openCart } = useCart();
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [scrolled, setScrolled] = useState(false);
@@ -63,6 +65,12 @@ export function Navbar() {
             aria-label={theme === "dark" ? "Passer en mode clair" : "Passer en mode sombre"}
           >
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={openCart} aria-label="Panier" className="relative">
+            <ShoppingCart className="h-4 w-4" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-4 min-w-4 px-1 flex items-center justify-center">{cartCount}</span>
+            )}
           </Button>
           {user ? (
             <>

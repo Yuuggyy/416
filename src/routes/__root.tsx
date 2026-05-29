@@ -15,6 +15,8 @@ import { AppSettingsProvider } from "@/lib/app-settings";
 import { PlayerProvider } from "@/lib/player";
 import { MiniPlayer } from "@/components/MiniPlayer";
 import { ThemeProvider } from "@/lib/theme";
+import { CartProvider } from "@/lib/cart";
+import { CartDrawer } from "@/components/CartDrawer";
 
 function NotFoundComponent() {
   return (
@@ -110,11 +112,14 @@ function RootComponent() {
       <ThemeProvider>
         <AuthProvider>
           <AppSettingsProvider>
-            <PlayerProvider>
-              <Outlet />
-              <MiniPlayer />
-              <Toaster />
-            </PlayerProvider>
+            <CartProvider>
+              <PlayerProvider>
+                <Outlet />
+                <MiniPlayer />
+                <CartDrawer />
+                <Toaster />
+              </PlayerProvider>
+            </CartProvider>
           </AppSettingsProvider>
         </AuthProvider>
       </ThemeProvider>
