@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Pencil, Trash2, Plus, Upload, Film, Music, ShoppingBag, Settings as SettingsIcon } from "lucide-react";
+import { Loader2, Pencil, Trash2, Plus, Upload, Film, Music, ShoppingBag, Settings as SettingsIcon, Inbox, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAppSettings } from "@/lib/app-settings";
 
@@ -42,7 +42,8 @@ function AdminPage() {
         </div>
 
         <Tabs defaultValue="movies" className="space-y-6">
-          <TabsList className="bg-card border border-border h-auto p-1">
+          <TabsList className="bg-card border border-border h-auto p-1 flex-wrap">
+            <TabsTrigger value="orders" className="gap-2"><Inbox className="h-4 w-4" /> Commandes</TabsTrigger>
             <TabsTrigger value="movies" className="gap-2"><Film className="h-4 w-4" /> Films</TabsTrigger>
             <TabsTrigger value="artists" className="gap-2"><Music className="h-4 w-4" /> Artistes</TabsTrigger>
             <TabsTrigger value="tracks" className="gap-2"><Music className="h-4 w-4" /> Titres</TabsTrigger>
@@ -50,6 +51,7 @@ function AdminPage() {
             <TabsTrigger value="settings" className="gap-2"><SettingsIcon className="h-4 w-4" /> Apparence</TabsTrigger>
           </TabsList>
 
+          <TabsContent value="orders"><OrdersAdmin /></TabsContent>
           <TabsContent value="movies"><MoviesAdmin /></TabsContent>
           <TabsContent value="artists"><ArtistsAdmin /></TabsContent>
           <TabsContent value="tracks"><TracksAdmin /></TabsContent>
