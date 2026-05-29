@@ -4,7 +4,8 @@ import { supabase, type Merch, type Artist } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShoppingBag, ExternalLink } from "lucide-react";
+import { Loader2, ShoppingBag, ExternalLink, Plus } from "lucide-react";
+import { useCart } from "@/lib/cart";
 
 export const Route = createFileRoute("/merch")({
   component: MerchPage,
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/merch")({
 function MerchPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { add: addToCart } = useCart();
   const [items, setItems] = useState<Merch[]>([]);
   const [artists, setArtists] = useState<Record<string, Artist>>({});
   const [loading, setLoading] = useState(true);
@@ -93,11 +95,15 @@ function MerchPage() {
                     ) : <span className="text-muted-foreground text-sm">—</span>}
                     {!m.in_stock && <span className="text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">Épuisé</span>}
                   </div>
-                  {m.external_url && (
-                    <Button asChild size="sm" variant="secondary" className="w-full mt-2">
-                      <a href={m.external_url} target="_blank" rel="noreferrer">Commander <ExternalLink className="h-3 w-3 ml-1" /></a>
+                  {m.in_stock && m.price != null ? (
+                    <Button size="sm" onClick={() => addToCart(m)} className="w-full mt-2">
+                      <Plus className="h-3 w-3 mr-1" /> Ajouter au panier
                     </Button>
-                  )}
+                  ) : m.external_url ? (
+                    <Button asChild size="sm" variant="secondary" className="w-full mt-2">
+                      <a href={m.external_url} target="_blank" rel="noreferrer">Voir <ExternalLink className="h-3 w-3 ml-1" /></a>
+                    </Button>
+                  ) : null}
                 </div>
               </div>
             ))}
