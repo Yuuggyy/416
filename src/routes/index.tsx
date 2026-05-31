@@ -7,6 +7,7 @@ import { HeroBanner } from "@/components/HeroBanner";
 import { MovieRow } from "@/components/MovieRow";
 import { Button } from "@/components/ui/button";
 import { Film, Loader2, Music } from "lucide-react";
+import { useAppSettings } from "@/lib/app-settings";
 
 export const Route = createFileRoute("/")({
   component: Index,
