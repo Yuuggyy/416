@@ -7,6 +7,7 @@ import { HeroBanner } from "@/components/HeroBanner";
 import { MovieRow } from "@/components/MovieRow";
 import { Button } from "@/components/ui/button";
 import { Film, Loader2, Music } from "lucide-react";
+import { useAppSettings } from "@/lib/app-settings";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -104,34 +105,39 @@ function ArtistsRow({ artists }: { artists: Artist[] }) {
 }
 
 function Landing({ onCTA }: { onCTA: () => void }) {
+  const { settings } = useAppSettings();
   return (
     <div className="min-h-screen relative overflow-hidden bg-background">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--gold)_/_0.12,_transparent_60%)]" />
       <header className="relative z-10 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <Film className="h-7 w-7 text-primary" />
-          <span className="font-display text-3xl font-bold text-gradient-gold">416 Records</span>
+          {settings.logo_url ? (
+            <img src={settings.logo_url} alt={settings.app_name} className="h-8 w-8 rounded object-cover" />
+          ) : (
+            <Film className="h-7 w-7 text-primary" />
+          )}
+          <span className="font-display text-3xl font-bold text-gradient-gold">{settings.app_name}</span>
         </div>
         <Button onClick={onCTA} size="sm">Connexion</Button>
       </header>
       <main className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-32 text-center">
         <span className="inline-block text-xs uppercase tracking-[0.3em] text-primary mb-6">
-          Maison de production
+          {settings.landing_eyebrow}
         </span>
         <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl font-bold leading-[1.05] mb-6">
-          Films, musique,
+          {settings.landing_title_1}
           <br />
-          <span className="text-gradient-gold">une seule maison.</span>
+          <span className="text-gradient-gold">{settings.landing_title_2}</span>
         </h1>
-        <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-          Découvrez les films, les artistes et le merch officiel de 416 Records. Tout l'univers du label, en un seul endroit.
+        <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 whitespace-pre-line">
+          {settings.landing_subtitle}
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
           <Button size="lg" onClick={onCTA} className="font-semibold text-base px-8 shadow-gold-glow">
-            Entrer dans l'univers
+            {settings.landing_cta_primary}
           </Button>
           <Button size="lg" variant="secondary" asChild>
-            <Link to="/login">Déjà membre ?</Link>
+            <Link to="/login">{settings.landing_cta_secondary}</Link>
           </Button>
         </div>
       </main>

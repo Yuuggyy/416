@@ -538,18 +538,20 @@ function UploadButton({ accept, folder, onUploaded }: { accept: string; folder: 
 /* ============== SETTINGS ============== */
 function SettingsAdmin() {
   const { settings, update } = useAppSettings();
-  const [name, setName] = useState(settings.app_name);
-  const [logo, setLogo] = useState(settings.logo_url);
+  const [form, setForm] = useState(settings);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => { setName(settings.app_name); setLogo(settings.logo_url); }, [settings.app_name, settings.logo_url]);
+  useEffect(() => { setForm(settings); }, [settings]);
+
+  const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
 
   const save = async (e: FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
-      await update("app_name", name);
-      await update("logo_url", logo);
+      for (const k of Object.keys(form) as (keyof typeof form)[]) {
+        await update(k, form[k]);
+      }
       toast.success("Apparence mise à jour");
     } catch (err: any) {
       toast.error(err.message ?? "Erreur");
@@ -559,29 +561,53 @@ function SettingsAdmin() {
   };
 
   return (
-    <div className="space-y-8">
-      <FormCard title="Identité de l'app" icon={<Plus className="h-5 w-5 text-primary" />}>
-        <form onSubmit={save} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={save} className="space-y-8">
+      <FormCard title="Identité de l'app" icon={<SettingsIcon className="h-5 w-5 text-primary" />}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Field label="Nom de l'app" full>
-            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="416 Records" />
+            <Input value={form.app_name} onChange={(e) => set("app_name", e.target.value)} placeholder="416 Records" />
           </Field>
           <Field label="Logo (URL ou upload)" full>
             <div className="flex gap-2">
-              <Input value={logo} onChange={(e) => setLogo(e.target.value)} placeholder="https://..." />
-              <UploadButton accept="image/*" folder="branding" onUploaded={(url) => setLogo(url)} />
+              <Input value={form.logo_url} onChange={(e) => set("logo_url", e.target.value)} placeholder="https://..." />
+              <UploadButton accept="image/*" folder="branding" onUploaded={(url) => set("logo_url", url)} />
             </div>
-            {logo && (
+            {form.logo_url && (
               <div className="mt-3 flex items-center gap-3">
-                <img src={logo} alt="Logo" className="h-16 w-16 rounded object-cover border border-border" />
+                <img src={form.logo_url} alt="Logo" className="h-16 w-16 rounded object-cover border border-border" />
                 <span className="text-xs text-muted-foreground">Aperçu du logo</span>
               </div>
             )}
           </Field>
-          <div className="md:col-span-2">
-            <Button type="submit" disabled={saving}>{saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}Enregistrer</Button>
-          </div>
-        </form>
+        </div>
       </FormCard>
-    </div>
+
+      <FormCard title="Page d'accueil (visiteurs non connectés)" icon={<SettingsIcon className="h-5 w-5 text-primary" />}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Field label="Petit titre (eyebrow)" full>
+            <Input value={form.landing_eyebrow} onChange={(e) => set("landing_eyebrow", e.target.value)} />
+          </Field>
+          <Field label="Titre principal — ligne 1">
+            <Input value={form.landing_title_1} onChange={(e) => set("landing_title_1", e.target.value)} />
+          </Field>
+          <Field label="Titre principal — ligne 2 (doré)">
+            <Input value={form.landing_title_2} onChange={(e) => set("landing_title_2", e.target.value)} />
+          </Field>
+          <Field label="Sous-titre / description" full>
+            <Textarea rows={3} value={form.landing_subtitle} onChange={(e) => set("landing_subtitle", e.target.value)} />
+          </Field>
+          <Field label="Bouton principal">
+            <Input value={form.landing_cta_primary} onChange={(e) => set("landing_cta_primary", e.target.value)} />
+          </Field>
+          <Field label="Bouton secondaire">
+            <Input value={form.landing_cta_secondary} onChange={(e) => set("landing_cta_secondary", e.target.value)} />
+          </Field>
+        </div>
+      </FormCard>
+
+      <Button type="submit" disabled={saving}>
+        {saving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}Enregistrer
+      </Button>
+    </form>
   );
 }
