@@ -69,15 +69,15 @@ function ArtistDetail() {
           <div className="absolute inset-0 bg-gradient-to-br from-secondary to-background" />
         )}
         <div className="absolute inset-0 bg-cinema-fade" />
-        <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-end pb-10">
-          <div className="flex items-end gap-6">
+        <div className="relative z-10 h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-end pb-8 sm:pb-10">
+          <div className="flex items-end gap-4 sm:gap-6 min-w-0 w-full">
             {artist.photo_url && (
-              <img src={artist.photo_url} alt={artist.name} className="hidden sm:block w-40 h-40 rounded-full object-cover border-4 border-background shadow-gold-glow" />
+              <img src={artist.photo_url} alt={artist.name} className="hidden sm:block w-40 h-40 rounded-full object-cover border-4 border-background shadow-gold-glow shrink-0" />
             )}
-            <div>
+            <div className="min-w-0">
               <span className="text-xs uppercase tracking-[0.3em] text-primary">Artiste</span>
-              <h1 className="font-display text-4xl sm:text-6xl font-bold mt-2">{artist.name}</h1>
-              {artist.genre && <p className="text-muted-foreground mt-1">{artist.genre}</p>}
+              <h1 className="font-display text-3xl sm:text-6xl font-bold mt-2 break-words">{artist.name}</h1>
+              {artist.genre && <p className="text-muted-foreground mt-1 text-sm sm:text-base">{artist.genre}</p>}
             </div>
           </div>
         </div>

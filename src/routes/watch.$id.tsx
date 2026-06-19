@@ -93,10 +93,10 @@ function WatchPage() {
         )}
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
         <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
-          <div>
-            <h1 className="font-display text-4xl sm:text-5xl font-bold mb-2">{movie.title}</h1>
+          <div className="min-w-0">
+            <h1 className="font-display text-3xl sm:text-5xl font-bold mb-2 break-words">{movie.title}</h1>
             <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
               {movie.year && <span>{movie.year}</span>}
               {movie.genre && <span>{movie.genre}</span>}

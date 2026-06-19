@@ -58,13 +58,13 @@ function AccountPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="max-w-3xl mx-auto px-6 pt-28 pb-20 space-y-8">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-20 space-y-6 sm:space-y-8">
         <header>
-          <h1 className="font-display text-4xl sm:text-5xl font-bold mb-2">Mon compte</h1>
-          <p className="text-muted-foreground">Gérez vos informations et votre sécurité.</p>
+          <h1 className="font-display text-3xl sm:text-5xl font-bold mb-2">Mon compte</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">Gérez vos informations et votre sécurité.</p>
         </header>
 
-        <section className="bg-card border border-border rounded-xl p-6 space-y-4">
+        <section className="bg-card border border-border rounded-xl p-4 sm:p-6 space-y-4">
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center">
               <UserIcon className="h-6 w-6 text-primary" />
@@ -93,7 +93,7 @@ function AccountPage() {
           </div>
         </section>
 
-        <section className="bg-card border border-border rounded-xl p-6">
+        <section className="bg-card border border-border rounded-xl p-4 sm:p-6">
           <h2 className="font-display text-xl font-semibold mb-4">Changer de mot de passe</h2>
           <form onSubmit={changePassword} className="space-y-4">
             <div className="space-y-2">
@@ -106,7 +106,7 @@ function AccountPage() {
           </form>
         </section>
 
-        <section className="bg-card border border-border rounded-xl p-6">
+        <section className="bg-card border border-border rounded-xl p-4 sm:p-6">
           <h2 className="font-display text-xl font-semibold mb-2">Déconnexion</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Vous serez redirigé vers la page de connexion.

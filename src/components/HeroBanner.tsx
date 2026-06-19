@@ -5,7 +5,7 @@ import type { Movie } from "@/lib/supabase";
 
 export function HeroBanner({ movie }: { movie: Movie }) {
   return (
-    <section className="relative h-[85vh] min-h-[520px] w-full overflow-hidden">
+    <section className="relative h-[70vh] min-h-[420px] sm:h-[85vh] sm:min-h-[520px] w-full overflow-hidden">
       {movie.backdrop_url || movie.poster_url ? (
         <img
           src={movie.backdrop_url ?? movie.poster_url!}
@@ -18,7 +18,7 @@ export function HeroBanner({ movie }: { movie: Movie }) {
       <div className="absolute inset-0 bg-cinema-fade" />
       <div className="absolute inset-0 bg-cinema-side" />
 
-      <div className="relative h-full flex items-end pb-24 sm:pb-32">
+      <div className="relative h-full flex items-end pb-16 sm:pb-32">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             {movie.featured && (
@@ -26,7 +26,7 @@ export function HeroBanner({ movie }: { movie: Movie }) {
                 À la une
               </span>
             )}
-            <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold text-foreground leading-[1.05] mb-4">
+            <h1 className="font-display text-3xl sm:text-6xl lg:text-7xl font-bold text-foreground leading-[1.05] mb-3 sm:mb-4">
               {movie.title}
             </h1>
             <div className="flex items-center gap-3 text-sm text-muted-foreground mb-4">

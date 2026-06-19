@@ -51,7 +51,7 @@ function LoginPage() {
           <Film className="h-8 w-8 text-primary" />
           <span className="font-display text-3xl font-bold text-gradient-gold">416 Records</span>
         </Link>
-        <div className="bg-card/80 backdrop-blur-md border border-border rounded-xl p-8 shadow-gold-glow">
+        <div className="bg-card/80 backdrop-blur-md border border-border rounded-xl p-6 sm:p-8 shadow-gold-glow">
           <h1 className="font-display text-3xl font-bold mb-1">
             {mode === "signin" ? "Bon retour" : "Créer un compte"}
           </h1>
