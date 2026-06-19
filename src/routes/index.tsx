@@ -57,7 +57,7 @@ function Index() {
       ) : (
         <>
           {hero && <HeroBanner movie={hero} />}
-          <div className="relative z-10 -mt-16 sm:-mt-32 pb-20 space-y-8 sm:space-y-12">
+          <div className={`relative z-10 ${hero ? "-mt-16 sm:-mt-32" : "pt-20 sm:pt-28"} pb-20 space-y-8 sm:space-y-12`}>
             {categories.map((cat) => (
               <MovieRow key={cat} title={cat} movies={movies.filter((m) => m.category === cat)} />
             ))}
