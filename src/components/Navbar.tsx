@@ -16,6 +16,7 @@ export function Navbar() {
   const navigate = useNavigate();
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
