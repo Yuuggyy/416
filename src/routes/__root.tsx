@@ -123,6 +123,7 @@ function RootComponent() {
             <CartProvider>
               <PlayerProvider>
                 <Outlet />
+                <Footer />
                 <MiniPlayer />
                 <CartDrawer />
                 <Toaster />
