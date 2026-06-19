@@ -132,6 +132,7 @@ function RootComponent() {
               <PlayerProvider>
                 <Outlet />
                 <Footer />
+                <InstallPrompt />
                 <MiniPlayer />
                 <CartDrawer />
                 <Toaster />
