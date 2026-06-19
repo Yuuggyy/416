@@ -2,10 +2,11 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Film, Search, User as UserIcon, Sun, Moon, ShoppingCart } from "lucide-react";
+import { LogOut, Settings, Film, Search, User as UserIcon, Sun, Moon, ShoppingCart, Menu, X } from "lucide-react";
 import { useAppSettings } from "@/lib/app-settings";
 import { useTheme } from "@/lib/theme";
 import { useCart } from "@/lib/cart";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
