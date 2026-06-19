@@ -520,12 +520,27 @@ function UploadButton({ accept, folder, onUploaded }: { accept: string; folder: 
     if (!file) return;
     setBusy(true);
     const path = `${folder}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const { error } = await supabase.storage.from("media").upload(path, file, { cacheControl: "3600", upsert: false });
-    if (error) { toast.error(error.message); setBusy(false); return; }
-    const { data } = supabase.storage.from("media").getPublicUrl(path);
-    onUploaded(data.publicUrl);
-    toast.success("Uploadé"); setBusy(false);
-    if (ref.current) ref.current.value = "";
+    try {
+      const { error } = await supabase.storage
+        .from("media")
+        .upload(path, file, { cacheControl: "3600", upsert: true, contentType: file.type || undefined });
+      if (error) {
+        toast.error(
+          error.message?.includes("Bucket not found")
+            ? "Bucket 'media' introuvable dans Supabase Storage. Crée-le (public) puis réessaie."
+            : error.message || "Échec de l'upload",
+        );
+        return;
+      }
+      const { data } = supabase.storage.from("media").getPublicUrl(path);
+      onUploaded(data.publicUrl);
+      toast.success("Uploadé");
+    } catch (err: any) {
+      toast.error(err?.message || "Erreur réseau pendant l'upload");
+    } finally {
+      setBusy(false);
+      if (ref.current) ref.current.value = "";
+    }
   };
   return (
     <>
