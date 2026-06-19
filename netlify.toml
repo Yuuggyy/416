@@ -1,0 +1,35 @@
+# Netlify configuration — déploiement gratuit de l'app 416 Records
+#
+# Cette config bâtit l'app TanStack Start en SPA statique (Vite client build)
+# et sert tout via index.html avec un fallback SPA.
+#
+# IMPORTANT : pour activer le mode SPA statique (sans SSR Cloudflare),
+# voir le README — section "Déploiement Netlify".
+
+[build]
+  command = "bun run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Fallback SPA : toutes les routes inconnues renvoient index.html
+# (TanStack Router prend le relais côté client)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers de sécurité de base
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Cache long pour les assets immuables
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
