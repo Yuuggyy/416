@@ -35,21 +35,23 @@ function AdminPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-28 pb-20">
-        <div className="mb-8">
-          <h1 className="font-display text-4xl sm:text-5xl font-bold">Panneau d'administration</h1>
-          <p className="text-muted-foreground mt-2">Gérez films, artistes et boutique depuis un seul endroit.</p>
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-20">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="font-display text-3xl sm:text-5xl font-bold">Panneau d'administration</h1>
+          <p className="text-muted-foreground mt-2 text-sm sm:text-base">Gérez films, artistes et boutique depuis un seul endroit.</p>
         </div>
 
         <Tabs defaultValue="movies" className="space-y-6">
-          <TabsList className="bg-card border border-border h-auto p-1 flex-wrap">
-            <TabsTrigger value="orders" className="gap-2"><Inbox className="h-4 w-4" /> Commandes</TabsTrigger>
-            <TabsTrigger value="movies" className="gap-2"><Film className="h-4 w-4" /> Films</TabsTrigger>
-            <TabsTrigger value="artists" className="gap-2"><Music className="h-4 w-4" /> Artistes</TabsTrigger>
-            <TabsTrigger value="tracks" className="gap-2"><Music className="h-4 w-4" /> Titres</TabsTrigger>
-            <TabsTrigger value="merch" className="gap-2"><ShoppingBag className="h-4 w-4" /> Boutique</TabsTrigger>
-            <TabsTrigger value="settings" className="gap-2"><SettingsIcon className="h-4 w-4" /> Apparence</TabsTrigger>
-          </TabsList>
+          <div className="-mx-4 sm:mx-0 overflow-x-auto scrollbar-hide">
+            <TabsList className="bg-card border border-border h-auto p-1 inline-flex w-max sm:flex sm:flex-wrap sm:w-full mx-4 sm:mx-0">
+              <TabsTrigger value="orders" className="gap-2 shrink-0"><Inbox className="h-4 w-4" /> Commandes</TabsTrigger>
+              <TabsTrigger value="movies" className="gap-2 shrink-0"><Film className="h-4 w-4" /> Films</TabsTrigger>
+              <TabsTrigger value="artists" className="gap-2 shrink-0"><Music className="h-4 w-4" /> Artistes</TabsTrigger>
+              <TabsTrigger value="tracks" className="gap-2 shrink-0"><Music className="h-4 w-4" /> Titres</TabsTrigger>
+              <TabsTrigger value="merch" className="gap-2 shrink-0"><ShoppingBag className="h-4 w-4" /> Boutique</TabsTrigger>
+              <TabsTrigger value="settings" className="gap-2 shrink-0"><SettingsIcon className="h-4 w-4" /> Apparence</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="orders"><OrdersAdmin /></TabsContent>
           <TabsContent value="movies"><MoviesAdmin /></TabsContent>

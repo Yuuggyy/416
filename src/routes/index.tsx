@@ -57,7 +57,7 @@ function Index() {
       ) : (
         <>
           {hero && <HeroBanner movie={hero} />}
-          <div className="relative z-10 -mt-32 pb-20 space-y-12">
+          <div className="relative z-10 -mt-16 sm:-mt-32 pb-20 space-y-8 sm:space-y-12">
             {categories.map((cat) => (
               <MovieRow key={cat} title={cat} movies={movies.filter((m) => m.category === cat)} />
             ))}
@@ -109,27 +109,27 @@ function Landing({ onCTA }: { onCTA: () => void }) {
   return (
     <div className="min-h-screen relative overflow-hidden bg-background">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--gold)_/_0.12,_transparent_60%)]" />
-      <header className="relative z-10 flex items-center justify-between px-6 py-6 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
+      <header className="relative z-10 flex items-center justify-between gap-3 px-4 sm:px-6 py-5 sm:py-6 max-w-7xl mx-auto">
+        <div className="flex items-center gap-2 min-w-0">
           {settings.logo_url ? (
-            <img src={settings.logo_url} alt={settings.app_name} className="h-8 w-8 rounded object-cover" />
+            <img src={settings.logo_url} alt={settings.app_name} className="h-8 w-8 rounded object-cover shrink-0" />
           ) : (
-            <Film className="h-7 w-7 text-primary" />
+            <Film className="h-7 w-7 text-primary shrink-0" />
           )}
-          <span className="font-display text-3xl font-bold text-gradient-gold">{settings.app_name}</span>
+          <span className="font-display text-2xl sm:text-3xl font-bold text-gradient-gold truncate">{settings.app_name}</span>
         </div>
-        <Button onClick={onCTA} size="sm">Connexion</Button>
+        <Button onClick={onCTA} size="sm" className="shrink-0">Connexion</Button>
       </header>
-      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-32 text-center">
+      <main className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 pt-12 sm:pt-24 pb-20 sm:pb-32 text-center">
         <span className="inline-block text-xs uppercase tracking-[0.3em] text-primary mb-6">
           {settings.landing_eyebrow}
         </span>
-        <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl font-bold leading-[1.05] mb-6">
+        <h1 className="font-display text-4xl sm:text-7xl lg:text-8xl font-bold leading-[1.05] mb-6 break-words">
           {settings.landing_title_1}
           <br />
           <span className="text-gradient-gold">{settings.landing_title_2}</span>
         </h1>
-        <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 whitespace-pre-line">
+        <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8 sm:mb-10 whitespace-pre-line">
           {settings.landing_subtitle}
         </p>
         <div className="flex flex-wrap gap-3 justify-center">
