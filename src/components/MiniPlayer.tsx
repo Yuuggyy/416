@@ -2,6 +2,39 @@ import { Play, Pause, X, ExternalLink } from "lucide-react";
 import { usePlayer, getSpotifyEmbedUrl } from "@/lib/player";
 import { Button } from "@/components/ui/button";
 
+function extractSpotifyTrackId(url?: string | null): string | null {
+  if (!url) return null;
+  return url.match(/spotify\.com\/(?:intl-[a-z]+\/)?track\/([a-zA-Z0-9]+)/)?.[1] ?? null;
+}
+
+/**
+ * Opens Spotify in the native app when installed (full track + stream counted),
+ * falls back to the web player otherwise. iOS/Android handle the spotify:// scheme;
+ * desktop ignores it and the http fallback fires.
+ */
+function openInSpotify(spotifyUrl: string) {
+  const id = extractSpotifyTrackId(spotifyUrl);
+  if (!id) {
+    window.open(spotifyUrl, "_blank", "noopener,noreferrer");
+    return;
+  }
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile) {
+    // Try the native app first
+    const start = Date.now();
+    window.location.href = `spotify://track/${id}`;
+    // If the app didn't grab focus within 1.2s, fall back to web
+    setTimeout(() => {
+      if (Date.now() - start < 2000 && document.visibilityState === "visible") {
+        window.open(spotifyUrl, "_blank", "noopener,noreferrer");
+      }
+    }, 1200);
+  } else {
+    window.open(spotifyUrl, "_blank", "noopener,noreferrer");
+  }
+}
+
+
 export function MiniPlayer() {
   const { current, playing, progress, toggle, stop, seek } = usePlayer();
   if (!current) return null;
