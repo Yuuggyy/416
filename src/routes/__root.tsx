@@ -17,6 +17,7 @@ import { MiniPlayer } from "@/components/MiniPlayer";
 import { ThemeProvider } from "@/lib/theme";
 import { CartProvider } from "@/lib/cart";
 import { CartDrawer } from "@/components/CartDrawer";
+import { Footer } from "@/components/Footer";
 
 function NotFoundComponent() {
   return (
@@ -123,6 +124,7 @@ function RootComponent() {
             <CartProvider>
               <PlayerProvider>
                 <Outlet />
+                <Footer />
                 <MiniPlayer />
                 <CartDrawer />
                 <Toaster />
