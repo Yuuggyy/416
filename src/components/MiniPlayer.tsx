@@ -57,25 +57,40 @@ export function MiniPlayer() {
 
       {spotifyOnly ? (
         // Visible Spotify player — stays inside the app, counts as a real Spotify stream
-        <div className="max-w-7xl mx-auto px-3 py-2 flex items-center gap-3">
-          <div className="flex-1 min-w-0">
-            <iframe
-              key={current.id + (playing ? "-on" : "-off")}
-              title={`${current.title} — ${current.artist}`}
-              src={`${embed}${playing ? "&autoplay=1" : ""}`}
-              width="100%"
-              height="80"
-              frameBorder={0}
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-              className="rounded"
-            />
+        <div className="max-w-7xl mx-auto px-3 py-2 space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <iframe
+                key={current.id + (playing ? "-on" : "-off")}
+                title={`${current.title} — ${current.artist}`}
+                src={`${embed}${playing ? "&autoplay=1" : ""}`}
+                width="100%"
+                height="80"
+                frameBorder={0}
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+                className="rounded"
+              />
+            </div>
+            <Button size="icon" variant="ghost" onClick={stop} aria-label="Fermer">
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          <Button size="icon" variant="ghost" onClick={stop} aria-label="Fermer">
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <p className="text-muted-foreground hidden sm:block">
+              Connecte-toi à Spotify pour écouter en entier et soutenir l'artiste.
+            </p>
+            <button
+              type="button"
+              onClick={() => openInSpotify(current.spotify_url!)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#1DB954] hover:bg-[#1ed760] text-black font-semibold px-3 py-1.5 transition-colors"
+            >
+              Ouvrir dans Spotify <ExternalLink className="h-3 w-3" />
+            </button>
+          </div>
         </div>
       ) : (
+
         <div className="max-w-7xl mx-auto px-3 py-2 flex items-center gap-3">
           <div className="w-10 h-10 rounded bg-secondary overflow-hidden flex-shrink-0">
             {current.cover_url && <img src={current.cover_url} alt="" className="w-full h-full object-cover" />}
