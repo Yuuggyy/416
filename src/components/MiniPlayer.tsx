@@ -2,6 +2,39 @@ import { Play, Pause, X, ExternalLink } from "lucide-react";
 import { usePlayer, getSpotifyEmbedUrl } from "@/lib/player";
 import { Button } from "@/components/ui/button";
 
+function extractSpotifyTrackId(url?: string | null): string | null {
+  if (!url) return null;
+  return url.match(/spotify\.com\/(?:intl-[a-z]+\/)?track\/([a-zA-Z0-9]+)/)?.[1] ?? null;
+}
+
+/**
+ * Opens Spotify in the native app when installed (full track + stream counted),
+ * falls back to the web player otherwise. iOS/Android handle the spotify:// scheme;
+ * desktop ignores it and the http fallback fires.
+ */
+function openInSpotify(spotifyUrl: string) {
+  const id = extractSpotifyTrackId(spotifyUrl);
+  if (!id) {
+    window.open(spotifyUrl, "_blank", "noopener,noreferrer");
+    return;
+  }
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (isMobile) {
+    // Try the native app first
+    const start = Date.now();
+    window.location.href = `spotify://track/${id}`;
+    // If the app didn't grab focus within 1.2s, fall back to web
+    setTimeout(() => {
+      if (Date.now() - start < 2000 && document.visibilityState === "visible") {
+        window.open(spotifyUrl, "_blank", "noopener,noreferrer");
+      }
+    }, 1200);
+  } else {
+    window.open(spotifyUrl, "_blank", "noopener,noreferrer");
+  }
+}
+
+
 export function MiniPlayer() {
   const { current, playing, progress, toggle, stop, seek } = usePlayer();
   if (!current) return null;
@@ -24,25 +57,40 @@ export function MiniPlayer() {
 
       {spotifyOnly ? (
         // Visible Spotify player — stays inside the app, counts as a real Spotify stream
-        <div className="max-w-7xl mx-auto px-3 py-2 flex items-center gap-3">
-          <div className="flex-1 min-w-0">
-            <iframe
-              key={current.id + (playing ? "-on" : "-off")}
-              title={`${current.title} — ${current.artist}`}
-              src={`${embed}${playing ? "&autoplay=1" : ""}`}
-              width="100%"
-              height="80"
-              frameBorder={0}
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-              className="rounded"
-            />
+        <div className="max-w-7xl mx-auto px-3 py-2 space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <iframe
+                key={current.id + (playing ? "-on" : "-off")}
+                title={`${current.title} — ${current.artist}`}
+                src={`${embed}${playing ? "&autoplay=1" : ""}`}
+                width="100%"
+                height="80"
+                frameBorder={0}
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+                className="rounded"
+              />
+            </div>
+            <Button size="icon" variant="ghost" onClick={stop} aria-label="Fermer">
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          <Button size="icon" variant="ghost" onClick={stop} aria-label="Fermer">
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center justify-between gap-2 text-xs">
+            <p className="text-muted-foreground hidden sm:block">
+              Connecte-toi à Spotify pour écouter en entier et soutenir l'artiste.
+            </p>
+            <button
+              type="button"
+              onClick={() => openInSpotify(current.spotify_url!)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#1DB954] hover:bg-[#1ed760] text-black font-semibold px-3 py-1.5 transition-colors"
+            >
+              Ouvrir dans Spotify <ExternalLink className="h-3 w-3" />
+            </button>
+          </div>
         </div>
       ) : (
+
         <div className="max-w-7xl mx-auto px-3 py-2 flex items-center gap-3">
           <div className="w-10 h-10 rounded bg-secondary overflow-hidden flex-shrink-0">
             {current.cover_url && <img src={current.cover_url} alt="" className="w-full h-full object-cover" />}
@@ -52,16 +100,16 @@ export function MiniPlayer() {
             <p className="text-xs text-muted-foreground truncate">{current.artist}</p>
           </div>
           {embed && (
-            <a
-              href={current.spotify_url!}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => openInSpotify(current.spotify_url!)}
               className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1"
               title="Ouvrir sur Spotify"
             >
               Spotify <ExternalLink className="h-3 w-3" />
-            </a>
+            </button>
           )}
+
           <Button size="icon" variant="default" className="rounded-full h-10 w-10" onClick={toggle}>
             {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
           </Button>
