@@ -100,16 +100,16 @@ export function MiniPlayer() {
             <p className="text-xs text-muted-foreground truncate">{current.artist}</p>
           </div>
           {embed && (
-            <a
-              href={current.spotify_url!}
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() => openInSpotify(current.spotify_url!)}
               className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1"
               title="Ouvrir sur Spotify"
             >
               Spotify <ExternalLink className="h-3 w-3" />
-            </a>
+            </button>
           )}
+
           <Button size="icon" variant="default" className="rounded-full h-10 w-10" onClick={toggle}>
             {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 ml-0.5" />}
           </Button>
