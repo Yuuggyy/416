@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase, type Movie } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2, Plus, Check } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, Check, Share2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/watch/$id")({
@@ -104,9 +104,34 @@ function WatchPage() {
               <span className="text-primary">{movie.category}</span>
             </div>
           </div>
-          <Button onClick={toggleList} variant={inList ? "secondary" : "default"}>
-            {inList ? <><Check className="h-4 w-4" /> Dans ma liste</> : <><Plus className="h-4 w-4" /> Ma liste</>}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button onClick={toggleList} variant={inList ? "secondary" : "default"}>
+              {inList ? <><Check className="h-4 w-4" /> Dans ma liste</> : <><Plus className="h-4 w-4" /> Ma liste</>}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={async () => {
+                const url = typeof window !== "undefined" ? window.location.href : "";
+                const shareData = { title: movie.title, text: `Regarde « ${movie.title} » sur 416 Records`, url };
+                try {
+                  if (typeof navigator !== "undefined" && navigator.share) {
+                    await navigator.share(shareData);
+                    return;
+                  }
+                } catch (err) {
+                  if ((err as DOMException)?.name === "AbortError") return;
+                }
+                try {
+                  await navigator.clipboard.writeText(url);
+                  toast.success("Lien copié dans le presse-papier");
+                } catch {
+                  toast.error("Impossible de copier le lien");
+                }
+              }}
+            >
+              <Share2 className="h-4 w-4" /> Partager le lien
+            </Button>
+          </div>
         </div>
         {movie.description && (
           <p className="text-foreground/85 leading-relaxed max-w-3xl">{movie.description}</p>
