@@ -1,12 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, LogOut, ShieldCheck, User as UserIcon } from "lucide-react";
+import { Camera, Loader2, LogOut, ShieldCheck, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/account")({
@@ -20,6 +20,14 @@ function AccountPage() {
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [count, setCount] = useState<number | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    const url = (user?.user_metadata as { avatar_url?: string } | undefined)?.avatar_url ?? null;
+    setAvatar(url);
+  }, [user]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -47,6 +55,62 @@ function AccountPage() {
     }
   };
 
+  const onPickAvatar = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Choisissez une image");
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = () => reject(new Error("Image illisible"));
+        im.src = dataUrl;
+      });
+      const size = 256;
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas indisponible");
+      const ratio = Math.max(size / img.width, size / img.height);
+      const w = img.width * ratio;
+      const h = img.height * ratio;
+      ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+      const compressed = canvas.toDataURL("image/jpeg", 0.85);
+      const { error } = await supabase.auth.updateUser({ data: { avatar_url: compressed } });
+      if (error) throw error;
+      setAvatar(compressed);
+      toast.success("Photo de profil mise à jour");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec du téléversement");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const removeAvatar = async () => {
+    setUploadingAvatar(true);
+    const { error } = await supabase.auth.updateUser({ data: { avatar_url: null } });
+    setUploadingAvatar(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setAvatar(null);
+    toast.success("Photo retirée");
+  };
+
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -66,14 +130,54 @@ function AccountPage() {
 
         <section className="bg-card border border-border rounded-xl p-4 sm:p-6 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center">
-              <UserIcon className="h-6 w-6 text-primary" />
-            </div>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploadingAvatar}
+              className="group relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-primary/15 flex items-center justify-center ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-label="Changer la photo de profil"
+            >
+              {avatar ? (
+                <img src={avatar} alt="Photo de profil" className="h-full w-full object-cover" />
+              ) : (
+                <UserIcon className="h-6 w-6 text-primary" />
+              )}
+              <span className="absolute inset-0 hidden items-center justify-center bg-black/50 text-white group-hover:flex">
+                {uploadingAvatar ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+              </span>
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={onPickAvatar}
+            />
             <div className="min-w-0">
               <p className="font-semibold truncate">{user.email}</p>
               <p className="text-xs text-muted-foreground">
                 Membre depuis {new Date(user.created_at).toLocaleDateString("fr-FR")}
               </p>
+              <div className="mt-1 flex gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="text-primary hover:underline disabled:opacity-50"
+                >
+                  {avatar ? "Changer la photo" : "Ajouter une photo"}
+                </button>
+                {avatar && (
+                  <button
+                    type="button"
+                    onClick={removeAvatar}
+                    disabled={uploadingAvatar}
+                    className="text-muted-foreground hover:underline disabled:opacity-50"
+                  >
+                    Retirer
+                  </button>
+                )}
+              </div>
             </div>
             {isAdmin && (
               <span className="ml-auto inline-flex items-center gap-1 text-xs uppercase tracking-wider text-primary border border-primary/40 px-2 py-1 rounded">
