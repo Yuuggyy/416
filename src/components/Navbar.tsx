@@ -6,7 +6,6 @@ import { LogOut, Settings, Film, Search, User as UserIcon, Sun, Moon, ShoppingCa
 import { useAppSettings } from "@/lib/app-settings";
 import { useTheme } from "@/lib/theme";
 import { useCart } from "@/lib/cart";
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
@@ -57,7 +56,7 @@ export function Navbar() {
             <span className="font-display text-2xl sm:text-3xl text-foreground tracking-wide truncate">{settings.app_name || "416"}</span>
           </Link>
           {user && (
-            <nav className="hidden md:flex items-center gap-6 text-sm">
+            <nav className="hidden lg:flex items-center gap-6 text-sm">
               <Link to="/" className={linkCls(path === "/")}>Accueil</Link>
               <Link to="/browse" className={linkCls(path.startsWith("/browse"))}>Films</Link>
               <Link to="/artists" className={linkCls(path.startsWith("/artists"))}>Artistes</Link>
@@ -84,47 +83,60 @@ export function Navbar() {
           </Button>
           {user ? (
             <>
-              <Button asChild variant="ghost" size="sm" aria-label="Rechercher" className="hidden sm:inline-flex"><Link to="/search"><Search className="h-4 w-4" /></Link></Button>
-              <Button asChild variant="ghost" size="sm" aria-label="Mon compte" className="hidden sm:inline-flex"><Link to="/account"><UserIcon className="h-4 w-4" /></Link></Button>
-              <Button variant="ghost" size="sm" onClick={async () => { await signOut(); navigate({ to: "/login" }); }} aria-label="Déconnexion" className="hidden sm:inline-flex"><LogOut className="h-4 w-4" /></Button>
-              <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="ghost" size="sm" className="md:hidden" aria-label="Menu">
-                    <Menu className="h-5 w-5" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-72 bg-background border-border">
-                  <SheetTitle className="sr-only">Menu</SheetTitle>
-                  <div className="flex flex-col gap-1 mt-8 text-base">
-                    {[
-                      { to: "/", label: "Accueil" },
-                      { to: "/browse", label: "Films" },
-                      { to: "/artists", label: "Artistes" },
-                      { to: "/merch", label: "Boutique" },
-                      { to: "/watchlist", label: "Ma liste" },
-                      { to: "/search", label: "Rechercher" },
-                      { to: "/account", label: "Mon compte" },
-                      ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
-                    ].map((l) => (
-                      <Link key={l.to} to={l.to} onClick={() => setMobileOpen(false)} className="px-3 py-3 rounded-md hover:bg-accent">
-                        {l.label}
-                      </Link>
-                    ))}
-                    <button
-                      onClick={async () => { setMobileOpen(false); await signOut(); navigate({ to: "/login" }); }}
-                      className="text-left px-3 py-3 rounded-md hover:bg-accent flex items-center gap-2 text-destructive"
-                    >
-                      <LogOut className="h-4 w-4" /> Déconnexion
-                    </button>
-                  </div>
-                </SheetContent>
-              </Sheet>
+              <Button asChild variant="ghost" size="sm" aria-label="Rechercher" className="hidden lg:inline-flex"><Link to="/search"><Search className="h-4 w-4" /></Link></Button>
+              <Button asChild variant="ghost" size="sm" aria-label="Mon compte" className="hidden lg:inline-flex"><Link to="/account"><UserIcon className="h-4 w-4" /></Link></Button>
+              <Button variant="ghost" size="sm" onClick={async () => { await signOut(); navigate({ to: "/login" }); }} aria-label="Déconnexion" className="hidden lg:inline-flex"><LogOut className="h-4 w-4" /></Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="lg:hidden"
+                aria-label={mobileOpen ? "Fermer le menu" : "Menu"}
+                aria-expanded={mobileOpen}
+                aria-controls="mobile-navigation"
+                onClick={() => setMobileOpen((open) => !open)}
+              >
+                {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              </Button>
             </>
           ) : (
             <Button onClick={() => navigate({ to: "/login" })} size="sm">Connexion</Button>
           )}
         </div>
       </div>
+      {user && mobileOpen && (
+        <div id="mobile-navigation" className="fixed inset-0 top-16 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu de navigation">
+          <button className="absolute inset-0 bg-background/80 backdrop-blur-sm" aria-label="Fermer le menu" onClick={() => setMobileOpen(false)} />
+          <nav className="absolute right-0 top-0 h-[calc(100dvh-4rem)] w-80 max-w-[86vw] border-l border-border bg-background p-4 shadow-xl">
+            <div className="flex flex-col gap-1 text-base">
+              {[
+                { to: "/", label: "Accueil" },
+                { to: "/browse", label: "Films" },
+                { to: "/artists", label: "Artistes" },
+                { to: "/merch", label: "Boutique" },
+                { to: "/watchlist", label: "Ma liste" },
+                { to: "/search", label: "Rechercher" },
+                { to: "/account", label: "Mon compte" },
+                ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
+              ].map((l) => (
+                <Link
+                  key={l.to}
+                  to={l.to}
+                  onClick={() => setMobileOpen(false)}
+                  className={`rounded-md px-3 py-3 transition-colors hover:bg-accent ${path === l.to || (l.to !== "/" && path.startsWith(l.to)) ? "bg-accent text-foreground" : "text-muted-foreground"}`}
+                >
+                  {l.label}
+                </Link>
+              ))}
+              <button
+                onClick={async () => { setMobileOpen(false); await signOut(); navigate({ to: "/login" }); }}
+                className="mt-2 flex items-center gap-2 rounded-md px-3 py-3 text-left text-destructive transition-colors hover:bg-accent"
+              >
+                <LogOut className="h-4 w-4" /> Déconnexion
+              </button>
+            </div>
+          </nav>
+        </div>
+      )}
     </header>
   );
 }
