@@ -1,12 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, LogOut, ShieldCheck, User as UserIcon } from "lucide-react";
+import { Camera, Loader2, LogOut, ShieldCheck, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/account")({
@@ -20,6 +20,14 @@ function AccountPage() {
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [count, setCount] = useState<number | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    const url = (user?.user_metadata as { avatar_url?: string } | undefined)?.avatar_url ?? null;
+    setAvatar(url);
+  }, [user]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -45,6 +53,62 @@ function AccountPage() {
       toast.success("Mot de passe mis à jour");
       setPassword("");
     }
+  };
+
+  const onPickAvatar = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Choisissez une image");
+      return;
+    }
+    setUploadingAvatar(true);
+    try {
+      const dataUrl: string = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = () => reject(new Error("Image illisible"));
+        im.src = dataUrl;
+      });
+      const size = 256;
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas indisponible");
+      const ratio = Math.max(size / img.width, size / img.height);
+      const w = img.width * ratio;
+      const h = img.height * ratio;
+      ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+      const compressed = canvas.toDataURL("image/jpeg", 0.85);
+      const { error } = await supabase.auth.updateUser({ data: { avatar_url: compressed } });
+      if (error) throw error;
+      setAvatar(compressed);
+      toast.success("Photo de profil mise à jour");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Échec du téléversement");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const removeAvatar = async () => {
+    setUploadingAvatar(true);
+    const { error } = await supabase.auth.updateUser({ data: { avatar_url: null } });
+    setUploadingAvatar(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setAvatar(null);
+    toast.success("Photo retirée");
   };
 
   if (authLoading || !user) {
