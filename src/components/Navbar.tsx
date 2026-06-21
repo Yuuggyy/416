@@ -24,6 +24,19 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Ferme le menu mobile au changement de route + débloque body
+  // (Radix Sheet laisse parfois pointer-events:none sur <body> lors d'une
+  // navigation pendant l'animation de fermeture → toute la page se fige.)
+  useEffect(() => {
+    setMobileOpen(false);
+    const t = window.setTimeout(() => {
+      if (document.body.style.pointerEvents === "none") {
+        document.body.style.pointerEvents = "";
+      }
+    }, 300);
+    return () => window.clearTimeout(t);
+  }, [path]);
+
   const linkCls = (active: boolean) =>
     `transition-colors hover:text-primary ${active ? "text-foreground" : "text-muted-foreground"}`;
 
