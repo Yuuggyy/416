@@ -130,14 +130,54 @@ function AccountPage() {
 
         <section className="bg-card border border-border rounded-xl p-4 sm:p-6 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center">
-              <UserIcon className="h-6 w-6 text-primary" />
-            </div>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploadingAvatar}
+              className="group relative h-14 w-14 shrink-0 overflow-hidden rounded-full bg-primary/15 flex items-center justify-center ring-1 ring-border focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-label="Changer la photo de profil"
+            >
+              {avatar ? (
+                <img src={avatar} alt="Photo de profil" className="h-full w-full object-cover" />
+              ) : (
+                <UserIcon className="h-6 w-6 text-primary" />
+              )}
+              <span className="absolute inset-0 hidden items-center justify-center bg-black/50 text-white group-hover:flex">
+                {uploadingAvatar ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+              </span>
+            </button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={onPickAvatar}
+            />
             <div className="min-w-0">
               <p className="font-semibold truncate">{user.email}</p>
               <p className="text-xs text-muted-foreground">
                 Membre depuis {new Date(user.created_at).toLocaleDateString("fr-FR")}
               </p>
+              <div className="mt-1 flex gap-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className="text-primary hover:underline disabled:opacity-50"
+                >
+                  {avatar ? "Changer la photo" : "Ajouter une photo"}
+                </button>
+                {avatar && (
+                  <button
+                    type="button"
+                    onClick={removeAvatar}
+                    disabled={uploadingAvatar}
+                    className="text-muted-foreground hover:underline disabled:opacity-50"
+                  >
+                    Retirer
+                  </button>
+                )}
+              </div>
             </div>
             {isAdmin && (
               <span className="ml-auto inline-flex items-center gap-1 text-xs uppercase tracking-wider text-primary border border-primary/40 px-2 py-1 rounded">
