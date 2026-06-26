@@ -5,6 +5,16 @@ import { useAuth } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
 import { Loader2, Music } from "lucide-react";
 
+
+function imgUrl(url: string | null | undefined, width: number, quality = 75): string {
+  if (!url) return "";
+  if (url.includes(".supabase.co/storage/")) {
+    const sep = url.includes("?") ? "&" : "?";
+    return `${url}${sep}width=${width}&quality=${quality}&format=webp`;
+  }
+  return url;
+}
+
 export const Route = createFileRoute("/artists/")({
   component: ArtistsPage,
   head: () => ({ meta: [{ title: "Artistes — 416 Records" }] }),
@@ -53,7 +63,7 @@ function ArtistsPage() {
                 {/* Photo */}
                 <div className="relative aspect-square rounded-2xl overflow-hidden bg-secondary border border-border group-hover:border-primary/60 group-active:scale-95 transition-all shadow-lg group-hover:shadow-gold-glow">
                   {a.photo_url ? (
-                    <img src={a.photo_url} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={imgUrl(a.photo_url, 300)} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Music className="h-10 w-10 text-muted-foreground" />
