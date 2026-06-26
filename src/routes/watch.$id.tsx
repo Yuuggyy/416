@@ -7,6 +7,16 @@ import { ArrowLeft, Loader2, Plus, Check, Share2, Clock, Calendar, Tag } from "l
 import { MovieCard } from "@/components/MovieCard";
 import { toast } from "sonner";
 
+
+function imgUrl(url: string | null | undefined, width: number, quality = 75): string {
+  if (!url) return "";
+  if (url.includes(".supabase.co/storage/")) {
+    const sep = url.includes("?") ? "&" : "?";
+    return `${url}${sep}width=${width}&quality=${quality}&format=webp`;
+  }
+  return url;
+}
+
 export const Route = createFileRoute("/watch/$id")({
   component: WatchPage,
 });
@@ -130,7 +140,7 @@ function WatchPage() {
             autoPlay
             playsInline
             className="w-full h-full"
-            poster={movie.backdrop_url ?? movie.poster_url ?? undefined}
+            poster={imgUrl(movie.backdrop_url ?? movie.poster_url, 800, 80) || undefined}
           />
         )}
       </div>
