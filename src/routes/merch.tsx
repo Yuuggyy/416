@@ -12,6 +12,16 @@ export const Route = createFileRoute("/merch")({
   head: () => ({ meta: [{ title: "Boutique — 416 Records" }] }),
 });
 
+
+function imgUrl(url: string | null | undefined, width: number, quality = 75): string {
+  if (!url) return "";
+  if (url.includes(".supabase.co/storage/")) {
+    const sep = url.includes("?") ? "&" : "?";
+    return `${url}${sep}width=${width}&quality=${quality}&format=webp`;
+  }
+  return url;
+}
+
 // Modal de détail produit
 function MerchModal({ item, artist, onClose, onAdd }: {
   item: Merch;
@@ -31,7 +41,7 @@ function MerchModal({ item, artist, onClose, onAdd }: {
         {/* Image */}
         <div className="relative aspect-square w-full bg-secondary rounded-t-2xl sm:rounded-t-2xl overflow-hidden">
           {item.image_url ? (
-            <img src={item.image_url} alt={item.name} className="w-full h-full object-cover" />
+            <img src={imgUrl(item.image_url, 600, 80)} alt={item.name} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <ShoppingBag className="h-16 w-16 text-muted-foreground" />
@@ -182,7 +192,7 @@ function MerchPage() {
               >
                 <div className="aspect-square bg-secondary overflow-hidden relative">
                   {m.image_url ? (
-                    <img src={m.image_url} alt={m.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <img src={imgUrl(m.image_url, 400)} alt={m.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" decoding="async" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <ShoppingBag className="h-10 w-10 text-muted-foreground" />
