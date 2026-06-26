@@ -19,7 +19,9 @@ function ArtistsPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate({ to: "/login" }); return; }
-    supabase.from("artists").select("*").order("featured", { ascending: false }).order("created_at", { ascending: false })
+    supabase.from("artists").select("*")
+      .order("featured", { ascending: false })
+      .order("created_at", { ascending: false })
       .then(({ data }) => { setArtists((data as Artist[]) ?? []); setLoading(false); });
   }, [user, authLoading, navigate]);
 
@@ -30,11 +32,13 @@ function ArtistsPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20">
-        <div className="mb-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-24">
+        <div className="mb-8">
           <span className="text-xs uppercase tracking-[0.3em] text-primary">Notre roster</span>
-          <h1 className="font-display text-4xl sm:text-5xl font-bold mt-2">Artistes du label</h1>
-          <p className="text-muted-foreground mt-2 max-w-2xl">Découvrez les voix de la maison 416 Records. Musique, clips et exclusivités.</p>
+          <h1 className="font-display text-3xl sm:text-5xl font-bold mt-1">Artistes du label</h1>
+          <p className="text-muted-foreground mt-2 text-sm sm:text-base max-w-2xl">
+            Découvrez les voix de la maison 416 Records. Musique, clips et exclusivités.
+          </p>
         </div>
 
         {artists.length === 0 ? (
@@ -43,19 +47,41 @@ function ArtistsPage() {
             Aucun artiste pour le moment.
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-4 gap-y-6">
             {artists.map((a) => (
               <Link key={a.id} to="/artists/$id" params={{ id: a.id }} className="group">
-                <div className="aspect-square rounded-full overflow-hidden bg-secondary border border-border group-hover:border-primary/60 transition-all shadow-lg group-hover:shadow-gold-glow">
+                {/* Photo */}
+                <div className="relative aspect-square rounded-2xl overflow-hidden bg-secondary border border-border group-hover:border-primary/60 group-active:scale-95 transition-all shadow-lg group-hover:shadow-gold-glow">
                   {a.photo_url ? (
                     <img src={a.photo_url} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center"><Music className="h-10 w-10 text-muted-foreground" /></div>
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Music className="h-10 w-10 text-muted-foreground" />
+                    </div>
                   )}
+                  {/* Badge featured */}
+                  {a.featured && (
+                    <span className="absolute top-2 left-2 text-[10px] font-bold uppercase tracking-wider bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                      ★ Vedette
+                    </span>
+                  )}
+                  {/* Overlay hover desktop */}
+                  <div className="hidden sm:flex absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity items-center justify-center">
+                    <span className="text-white text-sm font-semibold">Voir profil →</span>
+                  </div>
                 </div>
-                <div className="mt-3 text-center">
-                  <h3 className="font-semibold truncate group-hover:text-primary transition-colors">{a.name}</h3>
-                  {a.genre && <p className="text-xs text-muted-foreground truncate">{a.genre}</p>}
+
+                {/* Infos */}
+                <div className="mt-2.5 px-0.5">
+                  <h3 className="font-semibold text-sm sm:text-base truncate group-hover:text-primary transition-colors">{a.name}</h3>
+                  {a.genre && (
+                    <p className="text-xs text-muted-foreground truncate mt-0.5">{a.genre}</p>
+                  )}
+                  {a.bio && (
+                    <p className="text-xs text-muted-foreground/70 mt-1 line-clamp-2 hidden sm:block leading-relaxed">
+                      {a.bio}
+                    </p>
+                  )}
                 </div>
               </Link>
             ))}
