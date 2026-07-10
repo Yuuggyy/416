@@ -1,26 +1,20 @@
-# Netlify configuration — déploiement gratuit de l'app 416 Records
+# Netlify configuration — 416 Records (TanStack Start + Nitro SSR)
 #
-# Cette config bâtit l'app TanStack Start en SPA statique (Vite client build)
-# et sert tout via index.html avec un fallback SPA.
+# Nitro "netlify" preset génère automatiquement :
+#   - .netlify/functions-internal/ pour la fonction SSR
+#   - dist/ pour les assets statiques (JS, CSS, images)
 #
-# IMPORTANT : pour activer le mode SPA statique (sans SSR Cloudflare),
-# voir le README — section "Déploiement Netlify".
+# Node 22 requis : Supabase realtime-js utilise WebSocket natif
+# (absent dans Node 20 → crash SSR à chaque requête)
 
 [build]
   command = "bun run build"
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
 
-# Fallback SPA : toutes les routes inconnues renvoient index.html
-# (TanStack Router prend le relais côté client)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
-# Headers de sécurité de base
+# Headers de sécurité
 [[headers]]
   for = "/*"
   [headers.values]
@@ -28,7 +22,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Cache long pour les assets immuables
+# Cache long pour les assets immuables (hash dans le nom)
 [[headers]]
   for = "/assets/*"
   [headers.values]
