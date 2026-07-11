@@ -12,24 +12,34 @@ export type PlayableTrack = {
 type PlayerCtx = {
   current: PlayableTrack | null;
   playing: boolean;
-  progress: number; // 0..1
-  duration: number; // seconds
+  progress: number;      // 0..1
+  duration: number;      // seconds
+  currentTime: number;   // seconds
   play: (track: PlayableTrack) => void;
   toggle: () => void;
   stop: () => void;
   seek: (ratio: number) => void;
+  openSpotify: (url: string) => void;
 };
 
 const Ctx = createContext<PlayerCtx | null>(null);
 
-function extractSpotifyId(url?: string | null): string | null {
-  if (!url) return null;
-  const m = url.match(/spotify\.com\/(?:intl-[a-z]+\/)?track\/([a-zA-Z0-9]+)/);
-  return m?.[1] ?? null;
-}
-export function getSpotifyEmbedUrl(url?: string | null): string | null {
-  const id = extractSpotifyId(url);
-  return id ? `https://open.spotify.com/embed/track/${id}?utm_source=416` : null;
+function openSpotify(url: string) {
+  const id = url.match(/spotify\.com\/(?:intl-[a-z]+\/)?track\/([a-zA-Z0-9]+)/)?.[1];
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(
+    typeof navigator !== "undefined" ? navigator.userAgent : ""
+  );
+  if (id && isMobile) {
+    const t = Date.now();
+    window.location.href = `spotify://track/${id}`;
+    setTimeout(() => {
+      if (Date.now() - t < 2000 && document.visibilityState === "visible") {
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+    }, 1200);
+  } else {
+    window.open(url, "_blank", "noopener,noreferrer");
+  }
 }
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
@@ -38,36 +48,44 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
 
+  // Créer l'élément audio une seule fois
   useEffect(() => {
     const a = new Audio();
     a.preload = "metadata";
     audioRef.current = a;
+
     const onTime = () => {
       if (!a.duration) return;
+      setCurrentTime(a.currentTime);
       setProgress(a.currentTime / a.duration);
       setDuration(a.duration);
     };
-    const onEnd = () => setPlaying(false);
+    const onEnd = () => { setPlaying(false); setProgress(0); setCurrentTime(0); };
     const onPlay = () => setPlaying(true);
     const onPause = () => setPlaying(false);
+    const onLoaded = () => setDuration(a.duration);
+
     a.addEventListener("timeupdate", onTime);
     a.addEventListener("ended", onEnd);
     a.addEventListener("play", onPlay);
     a.addEventListener("pause", onPause);
+    a.addEventListener("loadedmetadata", onLoaded);
+
     return () => {
       a.pause();
       a.removeEventListener("timeupdate", onTime);
       a.removeEventListener("ended", onEnd);
       a.removeEventListener("play", onPlay);
       a.removeEventListener("pause", onPause);
+      a.removeEventListener("loadedmetadata", onLoaded);
     };
   }, []);
 
-  // Media Session API — enables lockscreen / background controls on mobile
+  // Media Session API — contrôles lockscreen mobile
   useEffect(() => {
-    if (typeof navigator === "undefined" || !("mediaSession" in navigator)) return;
-    if (!current) return;
+    if (typeof navigator === "undefined" || !("mediaSession" in navigator) || !current) return;
     navigator.mediaSession.metadata = new MediaMetadata({
       title: current.title,
       artist: current.artist,
@@ -89,49 +107,62 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   const play = (track: PlayableTrack) => {
     const a = audioRef.current;
     if (!a) return;
-    // Spotify-only track: no native audio, the visible Spotify embed handles playback
-    if (!track.audio_url) {
-      a.pause();
-      a.removeAttribute("src");
-      setCurrent(track);
-      setProgress(0);
-      setPlaying(true);
-      return;
-    }
+
     if (current?.id === track.id) {
-      a.play();
+      // Même track — juste play/resume
+      if (a.paused && track.audio_url) { a.play().catch(() => {}); }
       return;
     }
+
     a.pause();
-    a.src = track.audio_url;
-    a.currentTime = 0;
     setCurrent(track);
     setProgress(0);
-    a.play().catch(() => setPlaying(false));
-  };
-  const toggle = () => {
-    if (current && !current.audio_url) {
-      // Spotify embed manages its own state; just flip the flag so the UI re-mounts the iframe
-      setPlaying((p) => !p);
-      return;
+    setCurrentTime(0);
+
+    if (track.audio_url) {
+      a.src = track.audio_url;
+      a.currentTime = 0;
+      a.play().catch(() => setPlaying(false));
+    } else {
+      // Spotify uniquement — ouvrir directement
+      a.removeAttribute("src");
+      if (track.spotify_url) openSpotify(track.spotify_url);
     }
+  };
+
+  const toggle = () => {
     const a = audioRef.current;
     if (!a || !current) return;
-    if (a.paused) a.play();
+    if (!current.audio_url) {
+      if (current.spotify_url) openSpotify(current.spotify_url);
+      return;
+    }
+    if (a.paused) a.play().catch(() => {});
     else a.pause();
   };
+
   const stop = () => {
     audioRef.current?.pause();
+    if (audioRef.current) {
+      audioRef.current.removeAttribute("src");
+    }
     setCurrent(null);
     setPlaying(false);
+    setProgress(0);
+    setCurrentTime(0);
   };
+
   const seek = (ratio: number) => {
     const a = audioRef.current;
     if (!a || !a.duration) return;
     a.currentTime = Math.max(0, Math.min(1, ratio)) * a.duration;
   };
 
-  return <Ctx.Provider value={{ current, playing, progress, duration, play, toggle, stop, seek }}>{children}</Ctx.Provider>;
+  return (
+    <Ctx.Provider value={{ current, playing, progress, duration, currentTime, play, toggle, stop, seek, openSpotify }}>
+      {children}
+    </Ctx.Provider>
+  );
 }
 
 export function usePlayer() {

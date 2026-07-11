@@ -16,6 +16,7 @@ import { PlayerProvider } from "@/lib/player";
 import { MiniPlayer } from "@/components/MiniPlayer";
 import { ThemeProvider } from "@/lib/theme";
 import { CartProvider } from "@/lib/cart";
+import { SubscriptionProvider } from "@/lib/subscription";
 import { CartDrawer } from "@/components/CartDrawer";
 import { Footer } from "@/components/Footer";
 import { InstallPrompt } from "@/components/InstallPrompt";
@@ -129,6 +130,7 @@ function RootComponent() {
         <AuthProvider>
           <AppSettingsProvider>
             <CartProvider>
+              <SubscriptionProvider>
               <PlayerProvider>
                 <Outlet />
                 <Footer />
@@ -137,6 +139,7 @@ function RootComponent() {
                 <CartDrawer />
                 <Toaster />
               </PlayerProvider>
+              </SubscriptionProvider>
             </CartProvider>
           </AppSettingsProvider>
         </AuthProvider>

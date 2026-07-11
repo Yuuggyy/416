@@ -2,7 +2,7 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Film, Search, User as UserIcon, Sun, Moon, ShoppingCart, Menu, X } from "lucide-react";
+import { LogOut, Settings, Film, Search, User as UserIcon, Sun, Moon, ShoppingCart, Menu, X, Zap } from "lucide-react";
 import { useAppSettings } from "@/lib/app-settings";
 import { useTheme } from "@/lib/theme";
 import { useCart } from "@/lib/cart";
@@ -62,6 +62,7 @@ export function Navbar() {
               <Link to="/artists" className={linkCls(path.startsWith("/artists"))}>Artistes</Link>
               <Link to="/merch" className={linkCls(path.startsWith("/merch"))}>Boutique</Link>
               <Link to="/watchlist" className={linkCls(path === "/watchlist")}>Ma liste</Link>
+              <Link to="/premium" className={`${linkCls(path === "/premium")} flex items-center gap-1 text-primary`}>✨ Premium</Link>
               {isAdmin && (
                 <Link to="/admin" className={`${linkCls(path.startsWith("/admin"))} flex items-center gap-1`}>
                   <Settings className="h-3.5 w-3.5" /> Admin
@@ -114,6 +115,7 @@ export function Navbar() {
                 { to: "/artists", label: "Artistes" },
                 { to: "/merch", label: "Boutique" },
                 { to: "/watchlist", label: "Ma liste" },
+                { to: "/premium", label: "✨ Premium" },
                 { to: "/search", label: "Rechercher" },
                 { to: "/account", label: "Mon compte" },
                 ...(isAdmin ? [{ to: "/admin", label: "Admin" }] : []),
