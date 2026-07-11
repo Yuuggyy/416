@@ -96,8 +96,7 @@ export function CartDrawer() {
     <Sheet open={isOpen} onOpenChange={(o) => !o && handleClose()}>
       <SheetContent 
         side="right"
-        className="w-full sm:max-w-md flex flex-col h-[100dvh] sm:h-full"
-        style={{ zIndex: 80 }}
+        className="w-full sm:max-w-md flex flex-col h-[100dvh] sm:h-full !z-[90]"
       >
         <SheetHeader>
           <SheetTitle className="font-display text-2xl flex items-center gap-2">

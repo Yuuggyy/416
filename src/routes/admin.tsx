@@ -84,7 +84,7 @@ function OrdersAdmin() {
 
   const refresh = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("orders").select("id,customer_name,whatsapp,items,total,currency,notes,status,created_at,user_id").order("created_at", { ascending: false });
     if (error) toast.error(error.message);
     setList((data as OrderRow[]) ?? []);
     setLoading(false);
@@ -173,7 +173,7 @@ function MoviesAdmin() {
 
   const refresh = async () => {
     setLoading(true);
-    const { data } = await supabase.from("movies").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase.from("movies").select("id,title,category,genre,year,duration_minutes,featured,created_at,poster_url").order("created_at", { ascending: false });
     setList((data as Movie[]) ?? []); setLoading(false);
   };
   useEffect(() => { refresh(); }, []);
@@ -247,7 +247,7 @@ function ArtistsAdmin() {
 
   const refresh = async () => {
     setLoading(true);
-    const { data } = await supabase.from("artists").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase.from("artists").select("id,name,bio,image_url,genre,created_at").order("created_at", { ascending: false });
     setList((data as Artist[]) ?? []); setLoading(false);
   };
   useEffect(() => { refresh(); }, []);
@@ -317,8 +317,8 @@ function TracksAdmin() {
   const refresh = async () => {
     setLoading(true);
     const [t, a] = await Promise.all([
-      supabase.from("tracks").select("*, artist:artists(name)").order("created_at", { ascending: false }),
-      supabase.from("artists").select("*").order("name"),
+      supabase.from("tracks").select("id,title,audio_url,video_url,cover_url,duration_seconds,release_year,artist_id,artist:artists(name),created_at").order("created_at", { ascending: false }),
+      supabase.from("artists").select("id,name,genre").order("name"),
     ]);
     setList((t.data as any) ?? []); setArtists((a.data as Artist[]) ?? []); setLoading(false);
   };
@@ -403,8 +403,8 @@ function MerchAdmin() {
   const refresh = async () => {
     setLoading(true);
     const [m, a] = await Promise.all([
-      supabase.from("merch").select("*").order("created_at", { ascending: false }),
-      supabase.from("artists").select("*").order("name"),
+      supabase.from("merch").select("id,name,image_url,price,currency,category,in_stock,artist_id,created_at").order("created_at", { ascending: false }),
+      supabase.from("artists").select("id,name,genre").order("name"),
     ]);
     setList((m.data as Merch[]) ?? []); setArtists((a.data as Artist[]) ?? []); setLoading(false);
   };
