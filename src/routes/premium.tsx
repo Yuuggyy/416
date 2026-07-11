@@ -1,119 +1,257 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { useSubscription } from "@/lib/subscription";
+import { useSubscription, SEASON_PRICE_FC, CURRENT_SEASON } from "@/lib/subscription";
+import { supabase } from "@/lib/supabase";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
-import { Zap, Check, Music, Film, ShoppingBag, Wifi } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Tv2, Check, X, Loader2, Ticket, Star, Zap } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/premium")({
   component: PremiumPage,
-  head: () => ({ meta: [{ title: "Premium — 416 Records" }] }),
+  head: () => ({ meta: [{ title: "Accès Saison — 416 Records" }] }),
 });
 
-const FEATURES_FREE = [
-  "Accès au catalogue de base",
-  "Écouter des extraits (30 sec)",
-  "Voir les clips et films",
-  "Publicités entre les lectures",
+const WHATSAPP_NUMBER = "243000000000"; // ← remplacer par le vrai numéro 416
+
+const INCLUS = [
+  "Tous les épisodes de l'émission — saison complète",
+  "Finale en live sur l'app (streaming exclusif)",
+  "Replays illimités de tous les épisodes",
+  "Contenu exclusif : behind the scenes, interviews",
+  "Clips et sessions studio des artistes 416",
+  "Vote du public pour les éliminations",
+  "Zéro publicité pendant toute la saison",
 ];
 
-const FEATURES_PREMIUM = [
-  "Tout le catalogue — sans limite",
-  "Lecture audio complète",
-  "Zéro publicité",
-  "Téléchargements offline (bientôt)",
-  "Accès prioritaire aux sorties",
-  "Badge Premium sur le profil",
+const NON_INCLUS = [
+  "Accès aux saisons précédentes",
+  "Téléchargement offline",
 ];
 
 function PremiumPage() {
   const { user } = useAuth();
-  const { isPremium } = useSubscription();
+  const { isPremium, subscription, loading, refresh } = useSubscription();
   const navigate = useNavigate();
+  const [artistCode, setArtistCode] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [requested, setRequested] = useState(false);
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <Navbar />
+        <main className="flex-1 flex flex-col items-center justify-center px-4 gap-4">
+          <Tv2 className="h-12 w-12 text-primary/40" />
+          <p className="text-lg font-semibold text-center">Connectez-vous pour accéder à la saison</p>
+          <Button onClick={() => navigate({ to: "/login" })}>Se connecter</Button>
+        </main>
+      </div>
+    );
+  }
+
+  // Demande enregistrée, en attente de confirmation
+  const handleRequest = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      // Créer une entrée "pending" — l'admin confirmera après paiement WhatsApp
+      const { error } = await supabase.from("subscriptions").upsert({
+        user_id: user.id,
+        season: CURRENT_SEASON,
+        status: "pending",
+        artist_code: artistCode.trim() || null,
+        amount_fc: SEASON_PRICE_FC,
+      }, { onConflict: "user_id,season" });
+
+      if (error) throw error;
+
+      // Ouvrir WhatsApp avec le message pré-rempli
+      const msg = encodeURIComponent(
+        `🎬 Demande d'accès Saison S1 — 416 Records\n\nEmail: ${user.email}\nMontant: ${SEASON_PRICE_FC} FC\n${artistCode.trim() ? `Code artiste: ${artistCode.trim()}` : ""}\n\nJ'ai envoyé le paiement et j'attends la confirmation d'accès.`
+      );
+      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank");
+
+      setRequested(true);
+      refresh();
+      toast.success("Demande enregistrée ! L'équipe 416 confirme votre accès.");
+    } catch (e: any) {
+      toast.error("Erreur : " + (e?.message ?? "réessayez"));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-28">
       <Navbar />
-      <main className="max-w-lg mx-auto px-4 pt-24">
+      <main className="max-w-lg mx-auto px-4 pt-20">
+
         {/* Hero */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto mb-4 shadow-gold-glow">
-            <Zap className="h-8 w-8 text-primary" />
+        <div className="text-center mb-8 pt-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 border border-primary/30 mb-4 shadow-gold-glow">
+            <Tv2 className="h-8 w-8 text-primary" />
           </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-bold mb-2">416 Premium</h1>
-          <p className="text-muted-foreground text-sm">Tout l'univers 416 Records. Sans limite. Sans pub.</p>
+          <h1 className="font-display text-3xl sm:text-4xl font-bold mb-2 text-foreground">
+            L'Émission 416
+          </h1>
+          <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+            La première émission musicale compétitive de Kinshasa — exclusivement sur l'app 416 Records.
+          </p>
         </div>
 
-        {/* Prix */}
-        <div className="bg-card border border-primary/40 rounded-2xl p-6 mb-6 shadow-gold-glow text-center">
-          <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-2">Abonnement mensuel</p>
-          <div className="flex items-end justify-center gap-1 mb-1">
-            <span className="font-display text-5xl font-bold text-foreground">1,50</span>
-            <span className="text-xl text-muted-foreground mb-1">$</span>
-          </div>
-          <p className="text-sm text-muted-foreground">≈ 3 500 FC / mois</p>
-          <p className="text-xs text-muted-foreground mt-1">Annulable à tout moment</p>
-
-          {isPremium ? (
-            <div className="mt-4 flex items-center justify-center gap-2 text-primary font-semibold text-sm">
-              <Check className="h-4 w-4" /> Vous êtes déjà Premium ✨
+        {/* ÉTAT : déjà premium */}
+        {!loading && isPremium && (
+          <div className="bg-primary/5 border border-primary/40 rounded-2xl p-6 mb-6 text-center shadow-gold-glow">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+              <Star className="h-6 w-6 text-primary" />
             </div>
-          ) : (
-            <Button
-              size="lg"
-              className="w-full mt-5 font-bold text-base shadow-gold-glow"
-              onClick={() => {
-                // TODO: rediriger vers le flux de paiement (Stripe / DPO / Mobile Money)
-                alert("Paiement bientôt disponible — Mobile Money, Visa, PayPal");
-              }}
-            >
-              <Zap className="h-4 w-4 mr-2" />
-              Passer Premium
+            <p className="font-bold text-lg text-primary mb-1">Accès actif ✓</p>
+            <p className="text-sm text-muted-foreground">
+              Vous avez accès à toute la saison <strong>S1 2026</strong>.
+            </p>
+            {subscription?.paid_at && (
+              <p className="text-xs text-muted-foreground mt-2">
+                Activé le {new Date(subscription.paid_at).toLocaleDateString("fr-FR")}
+              </p>
+            )}
+            <Button className="mt-4 w-full" onClick={() => navigate({ to: "/browse" })}>
+              Regarder maintenant
             </Button>
+          </div>
+        )}
+
+        {/* ÉTAT : pending (demande en attente) */}
+        {!loading && !isPremium && subscription?.status === "pending" && (
+          <div className="bg-yellow-500/10 border border-yellow-500/40 rounded-2xl p-5 mb-6 text-center">
+            <Loader2 className="h-6 w-6 text-yellow-500 mx-auto mb-2 animate-spin" />
+            <p className="font-semibold text-sm text-yellow-500">Paiement en attente de confirmation</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              L'équipe 416 va vérifier votre paiement et activer votre accès sous 24h.
+            </p>
+          </div>
+        )}
+
+        {/* ÉTAT : pas encore accès → afficher le prix + bouton */}
+        {!loading && !isPremium && subscription?.status !== "pending" && (
+          <>
+            {/* Prix */}
+            <div className="bg-card border border-primary/40 rounded-2xl p-6 mb-6 shadow-gold-glow text-center">
+              <p className="text-xs uppercase tracking-widest text-primary font-semibold mb-2">
+                Accès Saison Complète
+              </p>
+              <div className="flex items-end justify-center gap-1 mb-1">
+                <span className="font-display text-5xl font-bold">{SEASON_PRICE_FC.toLocaleString()}</span>
+                <span className="text-xl text-muted-foreground mb-1.5">FC</span>
+              </div>
+              <p className="text-sm text-muted-foreground">≈ 1,20 $ USD — paiement unique</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Accès permanent à toute la saison S1
+              </p>
+
+              {/* Code artiste */}
+              <div className="mt-5 text-left">
+                <Label htmlFor="artist-code" className="text-xs text-muted-foreground">
+                  Code artiste (optionnel)
+                </Label>
+                <Input
+                  id="artist-code"
+                  value={artistCode}
+                  onChange={e => setArtistCode(e.target.value.toUpperCase())}
+                  placeholder="Ex: YUGGY2026"
+                  className="mt-1 uppercase font-mono tracking-wider"
+                  style={{ fontSize: "16px" }}
+                  maxLength={20}
+                />
+                <p className="text-[11px] text-muted-foreground mt-1">
+                  Tu soutiens directement l'artiste en entrant son code.
+                </p>
+              </div>
+
+              <Button
+                size="lg"
+                className="w-full mt-5 font-bold text-base shadow-gold-glow h-12 touch-manipulation"
+                onClick={handleRequest}
+                disabled={saving || requested}
+              >
+                {saving
+                  ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Enregistrement…</>
+                  : <><Ticket className="h-4 w-4 mr-2" />Obtenir l'accès — {SEASON_PRICE_FC.toLocaleString()} FC</>
+                }
+              </Button>
+            </div>
+
+            {/* Comment ça marche */}
+            <div className="bg-secondary/30 border border-border rounded-xl p-4 mb-6">
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
+                Comment obtenir l'accès ?
+              </p>
+              <ol className="space-y-2.5">
+                {[
+                  `Envoie ${SEASON_PRICE_FC.toLocaleString()} FC via Mobile Money (Airtel, M-Pesa, Orange) ou en espèces`,
+                  "Clique sur le bouton ci-dessus — tu arrives sur WhatsApp avec ton reçu",
+                  "L'équipe 416 confirme ton paiement et active ton accès (max 24h)",
+                  "Tu reçois une notification et ton badge Premium apparaît",
+                ].map((s, i) => (
+                  <li key={i} className="flex gap-3 items-start">
+                    <span className="shrink-0 w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] flex items-center justify-center font-bold mt-0.5">
+                      {i + 1}
+                    </span>
+                    <span className="text-xs text-muted-foreground">{s}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </>
+        )}
+
+        {/* Ce qui est inclus */}
+        <div className="bg-card border border-border rounded-xl p-5 mb-4">
+          <p className="font-semibold text-sm mb-4 flex items-center gap-2">
+            <Zap className="h-4 w-4 text-primary" />
+            Ce qui est inclus
+          </p>
+          <ul className="space-y-2.5">
+            {INCLUS.map(f => (
+              <li key={f} className="flex items-start gap-3 text-sm">
+                <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span>{f}</span>
+              </li>
+            ))}
+          </ul>
+          {NON_INCLUS.length > 0 && (
+            <>
+              <div className="border-t border-border my-4" />
+              <ul className="space-y-2">
+                {NON_INCLUS.map(f => (
+                  <li key={f} className="flex items-start gap-3 text-sm text-muted-foreground">
+                    <X className="h-4 w-4 text-destructive/60 shrink-0 mt-0.5" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
 
-        {/* Comparatif */}
-        <div className="grid grid-cols-2 gap-3 mb-8">
-          {/* Gratuit */}
-          <div className="bg-card border border-border rounded-xl p-4">
-            <p className="font-semibold text-sm mb-3 text-muted-foreground">Gratuit</p>
-            <ul className="space-y-2">
-              {FEATURES_FREE.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-xs text-muted-foreground">
-                  <span className="shrink-0 mt-0.5 w-3.5 h-3.5 rounded-full bg-secondary flex items-center justify-center text-[8px]">✓</span>
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-          {/* Premium */}
-          <div className="bg-primary/5 border border-primary/40 rounded-xl p-4">
-            <p className="font-semibold text-sm mb-3 text-primary flex items-center gap-1">
-              <Zap className="h-3.5 w-3.5" /> Premium
-            </p>
-            <ul className="space-y-2">
-              {FEATURES_PREMIUM.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-xs text-foreground">
-                  <Check className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* Modes de paiement prévus */}
-        <div className="text-center">
-          <p className="text-xs text-muted-foreground mb-3">Modes de paiement disponibles bientôt</p>
+        {/* Modes de paiement */}
+        <div className="text-center pb-8">
+          <p className="text-xs text-muted-foreground mb-3">Modes de paiement acceptés</p>
           <div className="flex flex-wrap justify-center gap-2">
-            {["M-Pesa", "Airtel Money", "Orange Money", "Visa / Mastercard", "PayPal"].map((m) => (
-              <span key={m} className="text-[10px] bg-secondary text-muted-foreground px-2.5 py-1 rounded-full border border-border">
+            {["Airtel Money", "M-Pesa", "Orange Money", "Espèces (via agent)"].map(m => (
+              <span key={m} className="text-[10px] bg-secondary text-muted-foreground px-3 py-1 rounded-full border border-border">
                 {m}
               </span>
             ))}
           </div>
+          <p className="text-[11px] text-muted-foreground mt-3 italic">
+            Paiement par carte Visa bientôt disponible via CinetPay.
+          </p>
         </div>
+
       </main>
     </div>
   );

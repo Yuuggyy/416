@@ -247,7 +247,7 @@ function ArtistsAdmin() {
 
   const refresh = async () => {
     setLoading(true);
-    const { data } = await supabase.from("artists").select("id,name,bio,image_url,genre,created_at").order("created_at", { ascending: false });
+    const { data } = await supabase.from("artists").select("id,name,bio,photo_url,cover_url,genre,featured,created_at").order("created_at", { ascending: false });
     setList((data as Artist[]) ?? []); setLoading(false);
   };
   useEffect(() => { refresh(); }, []);
@@ -318,7 +318,7 @@ function TracksAdmin() {
     setLoading(true);
     const [t, a] = await Promise.all([
       supabase.from("tracks").select("id,title,audio_url,video_url,cover_url,duration_seconds,release_year,artist_id,artist:artists(name),created_at").order("created_at", { ascending: false }),
-      supabase.from("artists").select("id,name,genre").order("name"),
+      supabase.from("artists").select("id,name,genre,photo_url").order("name"),
     ]);
     setList((t.data as any) ?? []); setArtists((a.data as Artist[]) ?? []); setLoading(false);
   };
@@ -404,7 +404,7 @@ function MerchAdmin() {
     setLoading(true);
     const [m, a] = await Promise.all([
       supabase.from("merch").select("id,name,image_url,price,currency,category,in_stock,artist_id,created_at").order("created_at", { ascending: false }),
-      supabase.from("artists").select("id,name,genre").order("name"),
+      supabase.from("artists").select("id,name,genre,photo_url").order("name"),
     ]);
     setList((m.data as Merch[]) ?? []); setArtists((a.data as Artist[]) ?? []); setLoading(false);
   };

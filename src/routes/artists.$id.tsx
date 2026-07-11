@@ -35,7 +35,7 @@ function ArtistDetail() {
     if (!user) { navigate({ to: "/login" }); return; }
     (async () => {
       const [a, t, m] = await Promise.all([
-        supabase.from("artists").select("id,name,bio,image_url,genre,instagram_url,spotify_url,created_at").eq("id", id).maybeSingle(),
+        supabase.from("artists").select("id,name,bio,photo_url,genre,cover_url,created_at").eq("id", id).maybeSingle(),
         supabase.from("tracks").select("id,artist_id,title,audio_url,video_url,cover_url,duration_seconds,release_year,spotify_url,created_at").eq("artist_id", id).order("created_at", { ascending: false }),
         supabase.from("merch").select("id,name,image_url,price,currency,in_stock,external_url,artist_id").eq("artist_id", id).order("created_at", { ascending: false }),
       ]);
