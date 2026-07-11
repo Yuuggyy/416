@@ -36,8 +36,8 @@ function ArtistDetail() {
     (async () => {
       const [a, t, m] = await Promise.all([
         supabase.from("artists").select("*").eq("id", id).maybeSingle(),
-        supabase.from("tracks").select("*").eq("artist_id", id).order("created_at", { ascending: false }),
-        supabase.from("merch").select("*").eq("artist_id", id).order("created_at", { ascending: false }),
+        supabase.from("tracks").select("id,artist_id,title,audio_url,video_url,cover_url,duration_seconds,release_year,spotify_url,created_at").eq("artist_id", id).order("created_at", { ascending: false }),
+        supabase.from("merch").select("id,name,image_url,price,currency,in_stock,external_url,artist_id").eq("artist_id", id).order("created_at", { ascending: false }),
       ]);
       setArtist((a.data as Artist) ?? null);
       setTracks((t.data as Track[]) ?? []);

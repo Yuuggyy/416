@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { supabase } from "./supabase";
 
 type Settings = {
@@ -32,23 +32,42 @@ type Ctx = {
 
 const SettingsCtx = createContext<Ctx | null>(null);
 
+// Cache module-level : évite de refetch à chaque navigation
+let settingsCache: Settings | null = null;
+let cacheTs = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 min
+
 export function AppSettingsProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<Settings>(DEFAULTS);
+  const [settings, setSettings] = useState<Settings>(settingsCache ?? DEFAULTS);
+  const fetching = useRef(false);
 
   const refresh = async () => {
-    const { data } = await supabase.from("app_settings").select("key,value");
-    if (data) {
-      const next: Settings = { ...DEFAULTS };
-      for (const row of data as { key: string; value: string | null }[]) {
-        if (row.key in next && row.value != null && row.value !== "") {
-          (next as any)[row.key] = row.value;
+    if (fetching.current) return;
+    fetching.current = true;
+    try {
+      const { data } = await supabase.from("app_settings").select("key,value");
+      if (data) {
+        const next: Settings = { ...DEFAULTS };
+        for (const row of data as { key: string; value: string | null }[]) {
+          if (row.key in next && row.value != null && row.value !== "") {
+            (next as any)[row.key] = row.value;
+          }
         }
+        settingsCache = next;
+        cacheTs = Date.now();
+        setSettings(next);
       }
-      setSettings(next);
+    } finally {
+      fetching.current = false;
     }
   };
 
   useEffect(() => {
+    // Ne refetch que si le cache est expiré
+    if (settingsCache && Date.now() - cacheTs < CACHE_TTL) {
+      setSettings(settingsCache);
+      return;
+    }
     refresh();
   }, []);
 
@@ -57,7 +76,9 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
       .from("app_settings")
       .upsert({ key, value, updated_at: new Date().toISOString() }, { onConflict: "key" });
     if (error) throw error;
-    setSettings((s) => ({ ...s, [key]: value }));
+    const next = { ...(settingsCache ?? settings), [key]: value };
+    settingsCache = next;
+    setSettings(next);
   };
 
   return <SettingsCtx.Provider value={{ settings, refresh, update }}>{children}</SettingsCtx.Provider>;

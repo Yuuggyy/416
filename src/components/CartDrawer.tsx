@@ -10,6 +10,17 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Minus, Plus, Trash2, Loader2, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 
+
+function imgUrl(url: string | null | undefined, width: number): string {
+  if (!url) return "";
+  if (url.includes(".supabase.co/storage/")) {
+    const sep = url.includes("?") ? "&" : "?";
+    return `${url}${sep}width=${width}&quality=70&format=webp`;
+  }
+  return url;
+}
+
+
 export function CartDrawer() {
   const { items, isOpen, close, setQty, remove, total, currency, clear, count } = useCart();
   const { user } = useAuth();
@@ -43,7 +54,7 @@ export function CartDrawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={(o) => !o && close()}>
-      <SheetContent className="w-full sm:max-w-md flex flex-col">
+      <SheetContent className="w-full sm:max-w-md flex flex-col h-[100dvh] sm:h-full z-[60]">
         <SheetHeader>
           <SheetTitle className="font-display text-2xl flex items-center gap-2">
             <ShoppingBag className="h-5 w-5 text-primary" />
@@ -61,7 +72,7 @@ export function CartDrawer() {
               {items.map((i) => (
                 <div key={i.id} className="flex gap-3 items-center bg-card border border-border rounded-lg p-2">
                   <div className="w-14 h-14 bg-secondary rounded overflow-hidden flex-shrink-0">
-                    {i.image_url && <img src={i.image_url} alt={i.name} className="w-full h-full object-cover" />}
+                    {i.image_url && <img src={imgUrl(i.image_url, 120)} alt={i.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{i.name}</p>

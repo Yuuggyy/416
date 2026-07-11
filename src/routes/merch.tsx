@@ -129,8 +129,8 @@ function MerchPage() {
     if (authLoading) return;
     if (!user) { navigate({ to: "/login" }); return; }
     Promise.all([
-      supabase.from("merch").select("*").order("created_at", { ascending: false }),
-      supabase.from("artists").select("*"),
+      supabase.from("merch").select("id,name,description,image_url,price,currency,category,artist_id,in_stock,external_url").order("created_at", { ascending: false }),
+      supabase.from("artists").select("id,name"),
     ]).then(([m, a]) => {
       setItems((m.data as Merch[]) ?? []);
       const map: Record<string, Artist> = {};

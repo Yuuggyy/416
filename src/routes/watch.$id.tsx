@@ -49,7 +49,7 @@ function WatchPage() {
           setSuggestions(sugg as Movie[]);
         } else {
           // Si pas assez dans la même catégorie, prendre les derniers
-          const { data: recent } = await supabase.from("movies").select("*")
+          const { data: recent } = await supabase.from("movies").select("id,title,poster_url,category,genre,year,created_at,featured")
             .neq("id", id).order("created_at", { ascending: false }).limit(8);
           setSuggestions((recent as Movie[]) ?? []);
         }
