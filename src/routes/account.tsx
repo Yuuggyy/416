@@ -2,6 +2,8 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
+import { useSubscription } from "@/lib/subscription";
+import { Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +18,7 @@ export const Route = createFileRoute("/account")({
 
 function AccountPage() {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
+  const { isPremium, plan } = useSubscription();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
@@ -190,9 +193,12 @@ function AccountPage() {
               <p className="font-display text-2xl font-bold text-gradient-gold">{count ?? "—"}</p>
               <p className="text-xs text-muted-foreground mt-1">Films dans ma liste</p>
             </div>
-            <div className="bg-secondary/40 rounded-lg p-4">
-              <p className="font-display text-2xl font-bold text-gradient-gold">∞</p>
-              <p className="text-xs text-muted-foreground mt-1">Streaming illimité</p>
+            <div className={`rounded-lg p-4 text-center ${isPremium ? "bg-primary/10 border border-primary/30" : "bg-secondary/40"}`}>
+              <p className="font-display text-2xl font-bold text-gradient-gold">{isPremium ? "✨" : "Free"}</p>
+              <p className="text-xs text-muted-foreground mt-1">{isPremium ? "Compte Premium" : "Compte gratuit"}</p>
+              {!isPremium && (
+                <Link to="/premium" className="text-[10px] text-primary font-semibold hover:underline mt-1 block">Passer Premium →</Link>
+              )}
             </div>
           </div>
         </section>
