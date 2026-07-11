@@ -127,15 +127,24 @@ function MerchPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user) { navigate({ to: "/login" }); return; }
+    if (!user) {
+      navigate({ to: "/login" });
+      return;
+    }
+    setLoading(true);
     Promise.all([
       supabase.from("merch").select("id,name,description,image_url,price,currency,category,artist_id,in_stock,external_url").order("created_at", { ascending: false }),
       supabase.from("artists").select("id,name"),
     ]).then(([m, a]) => {
+      if (m.error) console.error("Merch error:", m.error);
+      if (a.error) console.error("Artists error:", a.error);
       setItems((m.data as Merch[]) ?? []);
       const map: Record<string, Artist> = {};
       ((a.data as Artist[]) ?? []).forEach((x) => { map[x.id] = x; });
       setArtists(map);
+      setLoading(false);
+    }).catch((e) => {
+      console.error("Fetch error:", e);
       setLoading(false);
     });
   }, [user, authLoading, navigate]);
