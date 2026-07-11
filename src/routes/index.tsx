@@ -23,8 +23,8 @@ function Index() {
   useEffect(() => {
     if (!user) return;
     Promise.all([
-      supabase.from("movies").select("*").order("created_at", { ascending: false }),
-      supabase.from("artists").select("*").order("featured", { ascending: false }).order("created_at", { ascending: false }),
+      supabase.from("movies").select("id,title,poster_url,category,genre,year,created_at,featured").order("created_at", { ascending: false }).limit(40),
+      supabase.from("artists").select("id,name,photo_url,genre,featured,created_at").order("featured", { ascending: false }).order("created_at", { ascending: false }).limit(40),
     ]).then(([m, a]) => {
       setMovies((m.data as Movie[]) ?? []);
       setArtists((a.data as Artist[]) ?? []);

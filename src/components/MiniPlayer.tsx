@@ -1,5 +1,5 @@
-import { Play, Pause, X, ExternalLink, ChevronUp, ChevronDown } from "lucide-react";
-import { usePlayer, getSpotifyEmbedUrl } from "@/lib/player";
+import { Play, Pause, X, ExternalLink, ChevronDown } from "lucide-react";
+import { usePlayer } from "@/lib/player";
 import { useState } from "react";
 
 function extractSpotifyTrackId(url?: string | null): string | null {
@@ -29,23 +29,24 @@ export function MiniPlayer() {
   const [expanded, setExpanded] = useState(false);
   if (!current) return null;
 
-  const embed = getSpotifyEmbedUrl(current.spotify_url);
-  const spotifyOnly = !current.audio_url && !!embed;
+  const spotifyOnly = !current.audio_url && !!current.spotify_url;
 
-  // ── Version compacte (défaut mobile) ──
-  if (!expanded && !spotifyOnly) {
+  // ── Version compacte (défaut) ──
+  if (!expanded) {
     return (
       <div className="fixed bottom-0 inset-x-0 z-40 safe-area-bottom">
         {/* Barre de progression fine */}
-        <div
-          className="h-0.5 bg-secondary cursor-pointer"
-          onClick={(e) => {
-            const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-            seek((e.clientX - rect.left) / rect.width);
-          }}
-        >
-          <div className="h-full bg-primary transition-[width] duration-150" style={{ width: `${progress * 100}%` }} />
-        </div>
+        {!spotifyOnly && (
+          <div
+            className="h-0.5 bg-secondary cursor-pointer"
+            onClick={(e) => {
+              const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+              seek((e.clientX - rect.left) / rect.width);
+            }}
+          >
+            <div className="h-full bg-primary transition-[width] duration-150" style={{ width: `${progress * 100}%` }} />
+          </div>
+        )}
 
         {/* Barre compacte */}
         <div className="bg-card/97 backdrop-blur-md border-t border-border px-3 py-2 flex items-center gap-3">
@@ -57,20 +58,31 @@ export function MiniPlayer() {
             }
           </div>
 
-          {/* Titre + artiste — flex-1 avec overflow */}
-          <div className="flex-1 min-w-0" onClick={() => setExpanded(true)}>
+          {/* Titre + artiste */}
+          <div className="flex-1 min-w-0" onClick={() => !spotifyOnly && setExpanded(true)}>
             <p className="text-sm font-semibold truncate text-foreground">{current.title}</p>
             <p className="text-xs text-muted-foreground truncate">{current.artist}</p>
           </div>
 
           {/* Actions */}
           <div className="flex items-center gap-1 shrink-0">
-            <button
-              onClick={toggle}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-primary-foreground active:scale-90 transition-transform"
-            >
-              {playing ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
-            </button>
+            {spotifyOnly ? (
+              /* Spotify-only : bouton direct — pas d'iframe lourde */
+              <button
+                onClick={() => openInSpotify(current.spotify_url!)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#1DB954] text-white text-xs font-semibold active:scale-90 transition-transform"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Spotify
+              </button>
+            ) : (
+              <button
+                onClick={toggle}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-primary-foreground active:scale-90 transition-transform"
+              >
+                {playing ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
+              </button>
+            )}
             <button
               onClick={stop}
               className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground active:scale-90 transition-transform"
@@ -83,11 +95,10 @@ export function MiniPlayer() {
     );
   }
 
-  // ── Version étendue (Spotify embed ou player développé) ──
+  // ── Version étendue (audio natif uniquement) ──
   return (
     <div className="fixed bottom-0 inset-x-0 z-40 safe-area-bottom">
       <div className="bg-card/97 backdrop-blur-md border-t border-border">
-        {/* Handle drag + toggle */}
         <div className="flex items-center justify-between px-4 pt-2 pb-1">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             {current.cover_url && (
@@ -99,11 +110,9 @@ export function MiniPlayer() {
             </div>
           </div>
           <div className="flex items-center gap-1 shrink-0 ml-2">
-            {!spotifyOnly && (
-              <button onClick={toggle} className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-primary-foreground active:scale-90 transition-transform">
-                {playing ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
-              </button>
-            )}
+            <button onClick={toggle} className="w-9 h-9 flex items-center justify-center rounded-full bg-primary text-primary-foreground active:scale-90 transition-transform">
+              {playing ? <Pause className="h-4 w-4 fill-current" /> : <Play className="h-4 w-4 fill-current" />}
+            </button>
             <button onClick={() => setExpanded(false)} className="w-9 h-9 flex items-center justify-center rounded-full text-muted-foreground active:scale-90">
               <ChevronDown className="h-4 w-4" />
             </button>
@@ -114,40 +123,15 @@ export function MiniPlayer() {
         </div>
 
         {/* Barre de progression */}
-        {!spotifyOnly && (
-          <div
-            className="mx-4 h-1 bg-secondary rounded-full cursor-pointer mb-2"
-            onClick={(e) => {
-              const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-              seek((e.clientX - rect.left) / rect.width);
-            }}
-          >
-            <div className="h-full bg-primary rounded-full transition-[width] duration-150" style={{ width: `${progress * 100}%` }} />
-          </div>
-        )}
-
-        {/* Spotify embed */}
-        {spotifyOnly && embed && (
-          <div className="px-3 pb-3">
-            <iframe
-              src={embed}
-              width="100%"
-              height="80"
-              frameBorder="0"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-              className="rounded-lg"
-            />
-            {current.spotify_url && (
-              <button
-                onClick={() => openInSpotify(current.spotify_url!)}
-                className="mt-2 flex items-center gap-1.5 text-xs text-[#1DB954] font-medium mx-auto"
-              >
-                <ExternalLink className="h-3 w-3" /> Ouvrir dans Spotify
-              </button>
-            )}
-          </div>
-        )}
+        <div
+          className="mx-4 h-1 bg-secondary rounded-full cursor-pointer mb-3"
+          onClick={(e) => {
+            const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+            seek((e.clientX - rect.left) / rect.width);
+          }}
+        >
+          <div className="h-full bg-primary rounded-full transition-[width] duration-150" style={{ width: `${progress * 100}%` }} />
+        </div>
       </div>
     </div>
   );

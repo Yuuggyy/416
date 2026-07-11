@@ -7,6 +7,11 @@ import { MovieCard } from "@/components/MovieCard";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
+const PAGE_SIZE = 24;
+
+// Colonnes légères uniquement — pas de backdrop_url ni description
+const MOVIE_COLS = "id,title,poster_url,category,genre,year,created_at,featured";
+
 export const Route = createFileRoute("/browse")({
   component: BrowsePage,
   head: () => ({ meta: [{ title: "Parcourir — 416 Records" }] }),
@@ -18,21 +23,45 @@ function BrowsePage() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("Tous");
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const fetchPage = async (pageIndex: number, category: string, replace = false) => {
+    const from = pageIndex * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    let q = supabase
+      .from("movies")
+      .select(MOVIE_COLS)
+      .order("created_at", { ascending: false })
+      .range(from, to);
+    if (category !== "Tous") q = q.eq("category", category);
+    const { data } = await q;
+    const items = (data as Movie[]) ?? [];
+    setHasMore(items.length === PAGE_SIZE);
+    setMovies((prev) => (replace ? items : [...prev, ...items]));
+  };
 
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate({ to: "/login" }); return; }
-    supabase.from("movies").select("*").order("created_at", { ascending: false }).then(({ data }) => {
-      setMovies((data as Movie[]) ?? []);
-      setLoading(false);
-    });
-  }, [user, authLoading, navigate]);
+    setLoading(true);
+    fetchPage(0, filter, true).then(() => { setPage(0); setLoading(false); });
+  }, [user, authLoading, navigate, filter]);
 
+  const loadMore = async () => {
+    setLoadingMore(true);
+    const next = page + 1;
+    await fetchPage(next, filter);
+    setPage(next);
+    setLoadingMore(false);
+  };
+
+  // Catégories : on les tire de ce qui est déjà chargé
   const categories = useMemo(
     () => ["Tous", ...Array.from(new Set(movies.map((m) => m.category).filter(Boolean)))],
     [movies],
   );
-  const visible = filter === "Tous" ? movies : movies.filter((m) => m.category === filter);
 
   return (
     <div className="min-h-screen bg-background">
@@ -55,13 +84,26 @@ function BrowsePage() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-        ) : visible.length === 0 ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : movies.length === 0 ? (
           <p className="text-muted-foreground">Aucun titre dans cette catégorie.</p>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {visible.map((m) => <MovieCard key={m.id} movie={m} />)}
-          </div>
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+              {movies.map((m) => (
+                <MovieCard key={m.id} movie={m} />
+              ))}
+            </div>
+            {hasMore && (
+              <div className="flex justify-center mt-10">
+                <Button variant="secondary" onClick={loadMore} disabled={loadingMore}>
+                  {loadingMore ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Chargement...</> : "Voir plus"}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

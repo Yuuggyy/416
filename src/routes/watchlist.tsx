@@ -26,7 +26,7 @@ function WatchlistPage() {
     (async () => {
       const { data } = await supabase
         .from("watchlist")
-        .select("movie:movies(*)")
+        .select("movie:movies(id,title,poster_url,category,genre,year,created_at,featured)")
         .eq("user_id", user.id);
       const list = ((data ?? []) as unknown as Array<{ movie: Movie | null }>)
         .map((r) => r.movie)
