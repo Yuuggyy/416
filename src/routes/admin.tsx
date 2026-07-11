@@ -247,7 +247,9 @@ function ArtistsAdmin() {
 
   const refresh = async () => {
     setLoading(true);
-    const { data } = await supabase.from("artists").select("id,name,bio,photo_url,cover_url,genre,featured,created_at").order("created_at", { ascending: false });
+    const { data, error } = await supabase.from("artists").select("id,name,bio,photo_url,cover_url,genre,featured,created_at").order("created_at", { ascending: false });
+    if (error) console.error("[ArtistsAdmin] fetch error:", error);
+    console.log("[ArtistsAdmin] data:", data);
     setList((data as Artist[]) ?? []); setLoading(false);
   };
   useEffect(() => { refresh(); }, []);
