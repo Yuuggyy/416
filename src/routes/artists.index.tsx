@@ -29,7 +29,7 @@ function ArtistsPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user) { navigate({ to: "/login" }); return; }
-    supabase.from("artists").select("id,name,photo_url,genre,featured,bio,created_at")
+    supabase.from("artists").select("*")
       .order("featured", { ascending: false })
       .order("created_at", { ascending: false })
       .then(({ data }) => { setArtists((data as Artist[]) ?? []); setLoading(false); });
