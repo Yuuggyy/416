@@ -50081,18 +50081,21 @@ function detectPlatform() {
 }
 function isStandalone() {
   if (typeof window === "undefined") return false;
-  return window.matchMedia?.("(display-mode: standalone)").matches || window.matchMedia?.("(display-mode: fullscreen)").matches || // @ts-expect-error iOS specific
+  return window.matchMedia?.("(display-mode: standalone)").matches || window.matchMedia?.("(display-mode: fullscreen)").matches || window.matchMedia?.("(display-mode: minimal-ui)").matches || // @ts-expect-error iOS specific
   window.navigator.standalone === true;
 }
 var DISMISS_KEY = "416-install-dismissed";
 var DISMISS_DURATION = 1e3 * 60 * 60 * 24 * 7;
 function shouldShowAfterDismiss() {
-  if (typeof localStorage === "undefined") return true;
-  const dismissed = localStorage.getItem(DISMISS_KEY);
-  if (!dismissed) return true;
-  const dismissedAt = parseInt(dismissed, 10);
-  if (isNaN(dismissedAt)) return true;
-  return Date.now() - dismissedAt > DISMISS_DURATION;
+  try {
+    const dismissed = localStorage.getItem(DISMISS_KEY);
+    if (!dismissed) return true;
+    const dismissedAt = parseInt(dismissed, 10);
+    if (isNaN(dismissedAt)) return true;
+    return Date.now() - dismissedAt > DISMISS_DURATION;
+  } catch {
+    return true;
+  }
 }
 function InstallPrompt() {
   const [mounted, setMounted] = (0, import_react23.useState)(false);
@@ -50100,22 +50103,15 @@ function InstallPrompt() {
   const [hidden, setHidden] = (0, import_react23.useState)(true);
   const [bip, setBip] = (0, import_react23.useState)(null);
   const [platform, setPlatform] = (0, import_react23.useState)("desktop");
-  const [hasSw, setHasSw] = (0, import_react23.useState)(false);
   (0, import_react23.useEffect)(() => {
     setMounted(true);
     if (isStandalone()) return;
     if (!shouldShowAfterDismiss()) return;
     setPlatform(detectPlatform());
+    setHidden(false);
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/416/sw.js").then(() => {
-        setHasSw(true);
-        setTimeout(() => setHidden(false), 1500);
-      }).catch((err) => {
-        console.warn("SW registration failed:", err);
-        setTimeout(() => setHidden(false), 1500);
+      navigator.serviceWorker.register("/416/sw.js").catch(() => {
       });
-    } else {
-      setTimeout(() => setHidden(false), 1500);
     }
     const onBIP = (e) => {
       e.preventDefault();
@@ -50125,7 +50121,10 @@ function InstallPrompt() {
     window.addEventListener("beforeinstallprompt", onBIP);
     const onInstalled = () => {
       setHidden(true);
-      localStorage.setItem(DISMISS_KEY, Date.now().toString());
+      try {
+        localStorage.setItem(DISMISS_KEY, Date.now().toString());
+      } catch {
+      }
     };
     window.addEventListener("appinstalled", onInstalled);
     return () => {
@@ -50140,7 +50139,10 @@ function InstallPrompt() {
       const { outcome } = await bip.userChoice;
       if (outcome === "accepted") {
         setHidden(true);
-        localStorage.setItem(DISMISS_KEY, Date.now().toString());
+        try {
+          localStorage.setItem(DISMISS_KEY, Date.now().toString());
+        } catch {
+        }
       }
       setBip(null);
       return;
@@ -50149,7 +50151,10 @@ function InstallPrompt() {
   };
   const dismiss = () => {
     setHidden(true);
-    localStorage.setItem(DISMISS_KEY, Date.now().toString());
+    try {
+      localStorage.setItem(DISMISS_KEY, Date.now().toString());
+    } catch {
+    }
   };
   return /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)(import_jsx_runtime43.Fragment, { children: [
     /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("div", { className: "pointer-events-none fixed inset-x-0 bottom-24 z-40 flex justify-center px-4 sm:bottom-6 sm:justify-end sm:px-6", children: /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("div", { className: "pointer-events-auto flex items-center gap-2 rounded-full border border-border bg-background/95 px-3 py-2 shadow-lg backdrop-blur", children: [
@@ -50176,34 +50181,36 @@ function InstallPrompt() {
     ] }) }),
     /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Dialog2, { open, onOpenChange: setOpen, children: /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)(DialogContent2, { className: "max-w-md", children: [
       /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)(DialogHeader, { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(DialogTitle2, { children: "Installer 416 Records sur ton t\xE9l\xE9phone" }),
-        /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(DialogDescription2, { children: "Ajoute l'app \xE0 ton \xE9cran d'accueil \u2014 elle s'ouvre en plein \xE9cran, comme une vraie application, sans passer par le store." })
+        /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(DialogTitle2, { children: "Installer 416 Records" }),
+        /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(DialogDescription2, { children: "Ajoute l'app a ton ecran d'accueil \u2014 elle s'ouvre en plein ecran, comme une vraie application." })
       ] }),
-      platform === "ios" && /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("ol", { className: "space-y-3 text-sm", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("li", { className: "flex gap-3", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "font-semibold text-primary", children: "1." }),
-          /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("span", { className: "flex items-center gap-1", children: [
-            "Appuie sur le bouton ",
-            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Share, { className: "inline h-4 w-4" }),
-            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Partager" }),
-            " en bas de Safari."
-          ] })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("li", { className: "flex gap-3", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "font-semibold text-primary", children: "2." }),
-          /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("span", { className: "flex items-center gap-1", children: [
-            "Choisis ",
-            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Plus, { className: "inline h-4 w-4" }),
-            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Sur l'\xE9cran d'accueil" }),
-            "."
-          ] })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("li", { className: "flex gap-3", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "font-semibold text-primary", children: "3." }),
-          /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("span", { children: [
-            "Appuie sur ",
-            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Ajouter" }),
-            " en haut \xE0 droite."
+      platform === "ios" && /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("div", { className: "space-y-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("div", { className: "rounded-lg bg-blue-500/10 border border-blue-500/20 p-3 text-sm text-blue-300", children: "Tu es sur iPhone/iPad \u2014 suis ces etapes:" }),
+        /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("ol", { className: "space-y-4 text-sm", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("li", { className: "flex gap-3 items-start", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground", children: "1" }),
+            /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("span", { className: "flex items-center gap-1.5 pt-0.5", children: [
+              "Appuie sur le bouton",
+              /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "inline-flex items-center justify-center rounded-md bg-muted p-1", children: /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Share, { className: "h-4 w-4" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Partager" }),
+              "en bas de Safari"
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("li", { className: "flex gap-3 items-start", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground", children: "2" }),
+            /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("span", { className: "flex items-center gap-1.5 pt-0.5", children: [
+              "Fais defiler et choisis",
+              /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "inline-flex items-center justify-center rounded-md bg-muted p-1", children: /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Plus, { className: "h-4 w-4" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Sur l'ecran d'accueil" })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("li", { className: "flex gap-3 items-start", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground", children: "3" }),
+            /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("span", { className: "pt-0.5", children: [
+              "Appuie sur ",
+              /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Ajouter" }),
+              " en haut a droite"
+            ] })
           ] })
         ] })
       ] }),
@@ -50213,26 +50220,21 @@ function InstallPrompt() {
           /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("span", { className: "flex items-center gap-1", children: [
             "Ouvre le menu ",
             /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(EllipsisVertical, { className: "inline h-4 w-4" }),
-            " de Chrome (en haut \xE0 droite)."
+            " de Chrome"
           ] })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("li", { className: "flex gap-3", children: [
           /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "font-semibold text-primary", children: "2." }),
           /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("span", { children: [
             "Choisis ",
-            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Installer l'application" }),
-            " ou",
-            " ",
-            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Ajouter \xE0 l'\xE9cran d'accueil" }),
-            "."
+            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Installer l'application" })
           ] })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("li", { className: "flex gap-3", children: [
           /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "font-semibold text-primary", children: "3." }),
           /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("span", { children: [
             "Confirme avec ",
-            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Installer" }),
-            "."
+            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Installer" })
           ] })
         ] })
       ] }),
@@ -50240,23 +50242,17 @@ function InstallPrompt() {
         /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("li", { className: "flex gap-3", children: [
           /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "font-semibold text-primary", children: "1." }),
           /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("span", { children: [
-            "Dans la barre d'adresse de Chrome / Edge, clique sur l'ic\xF4ne",
-            " ",
+            "Clique sur l'icone ",
             /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Download, { className: "inline h-4 w-4" }),
-            " (\xE0 droite)."
+            " dans la barre d'adresse"
           ] })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("li", { className: "flex gap-3", children: [
           /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "font-semibold text-primary", children: "2." }),
           /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("span", { children: [
             "Clique sur ",
-            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Installer" }),
-            "."
+            /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("strong", { children: "Installer" })
           ] })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("li", { className: "flex gap-3", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { className: "font-semibold text-primary", children: "3." }),
-          /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("span", { children: "L'app s'ouvre dans sa propre fen\xEAtre." })
         ] })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("div", { className: "pt-2", children: /* @__PURE__ */ (0, import_jsx_runtime43.jsx)(Button, { variant: "outline", className: "w-full", onClick: () => setOpen(false), children: "J'ai compris" }) })

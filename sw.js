@@ -1,8 +1,8 @@
-const CACHE_NAME = '416-records-v1';
+const CACHE_NAME = '416-records-v2';
 const BASE = '/416/';
-const ASSETS = [
-  BASE,
-  BASE + 'index.html',
+
+// Static assets to precache
+const STATIC_ASSETS = [
   BASE + 'app.js',
   BASE + 'app.css',
   BASE + 'manifest.webmanifest',
@@ -13,7 +13,7 @@ const ASSETS = [
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS).catch(() => {}))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(STATIC_ASSETS).catch(() => {}))
   );
   self.skipWaiting();
 });
@@ -29,21 +29,40 @@ self.addEventListener('activate', (e) => {
 
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
-  // Only handle same-origin GET requests
-  if (url.origin !== self.location.origin || e.request.method !== 'GET') return;
-  // Skip Supabase and external APIs
-  if (url.hostname.includes('supabase') || url.hostname.includes('googleapis')) return;
 
+  // Only handle same-origin GET
+  if (url.origin !== self.location.origin || e.request.method !== 'GET') return;
+
+  // Skip external APIs
+  if (url.hostname.includes('supabase') || url.hostname.includes('googleapis') || url.hostname.includes('gstatic')) return;
+
+  // Navigation requests — network-first (never serve stale/404 HTML)
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request)
+        .then(response => {
+          if (response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(e.request).then(cached => cached || caches.match(BASE + 'index.html')))
+    );
+    return;
+  }
+
+  // Static assets — cache-first
   e.respondWith(
     caches.match(e.request).then(cached => {
-      const fetchPromise = fetch(e.request).then(response => {
-        if (response && response.status === 200) {
+      if (cached) return cached;
+      return fetch(e.request).then(response => {
+        if (response.status === 200) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         }
         return response;
       }).catch(() => cached);
-      return cached || fetchPromise;
     })
   );
 });
