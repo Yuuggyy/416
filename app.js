@@ -50075,34 +50075,63 @@ var import_jsx_runtime43 = __toESM(require_jsx_runtime(), 1);
 function detectPlatform() {
   if (typeof navigator === "undefined") return "desktop";
   const ua = navigator.userAgent.toLowerCase();
-  if (/iphone|ipad|ipod/.test(ua)) return "ios";
+  if (/iphone|ipad|ipod/.test(ua) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) return "ios";
   if (/android/.test(ua)) return "android";
   return "desktop";
 }
 function isStandalone() {
   if (typeof window === "undefined") return false;
-  return window.matchMedia?.("(display-mode: standalone)").matches || // @ts-expect-error iOS specific
+  return window.matchMedia?.("(display-mode: standalone)").matches || window.matchMedia?.("(display-mode: fullscreen)").matches || // @ts-expect-error iOS specific
   window.navigator.standalone === true;
 }
 var DISMISS_KEY = "416-install-dismissed";
+var DISMISS_DURATION = 1e3 * 60 * 60 * 24 * 7;
+function shouldShowAfterDismiss() {
+  if (typeof localStorage === "undefined") return true;
+  const dismissed = localStorage.getItem(DISMISS_KEY);
+  if (!dismissed) return true;
+  const dismissedAt = parseInt(dismissed, 10);
+  if (isNaN(dismissedAt)) return true;
+  return Date.now() - dismissedAt > DISMISS_DURATION;
+}
 function InstallPrompt() {
   const [mounted, setMounted] = (0, import_react23.useState)(false);
   const [open, setOpen] = (0, import_react23.useState)(false);
   const [hidden, setHidden] = (0, import_react23.useState)(true);
   const [bip, setBip] = (0, import_react23.useState)(null);
   const [platform, setPlatform] = (0, import_react23.useState)("desktop");
+  const [hasSw, setHasSw] = (0, import_react23.useState)(false);
   (0, import_react23.useEffect)(() => {
     setMounted(true);
     if (isStandalone()) return;
-    if (localStorage.getItem(DISMISS_KEY) === "1") return;
+    if (!shouldShowAfterDismiss()) return;
     setPlatform(detectPlatform());
-    setHidden(false);
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/416/sw.js").then(() => {
+        setHasSw(true);
+        setTimeout(() => setHidden(false), 1500);
+      }).catch((err) => {
+        console.warn("SW registration failed:", err);
+        setTimeout(() => setHidden(false), 1500);
+      });
+    } else {
+      setTimeout(() => setHidden(false), 1500);
+    }
     const onBIP = (e) => {
       e.preventDefault();
       setBip(e);
+      setHidden(false);
     };
     window.addEventListener("beforeinstallprompt", onBIP);
-    return () => window.removeEventListener("beforeinstallprompt", onBIP);
+    const onInstalled = () => {
+      setHidden(true);
+      localStorage.setItem(DISMISS_KEY, Date.now().toString());
+    };
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onBIP);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
   }, []);
   if (!mounted || hidden) return null;
   const handleClick = async () => {
@@ -50111,7 +50140,7 @@ function InstallPrompt() {
       const { outcome } = await bip.userChoice;
       if (outcome === "accepted") {
         setHidden(true);
-        localStorage.setItem(DISMISS_KEY, "1");
+        localStorage.setItem(DISMISS_KEY, Date.now().toString());
       }
       setBip(null);
       return;
@@ -50120,7 +50149,7 @@ function InstallPrompt() {
   };
   const dismiss = () => {
     setHidden(true);
-    localStorage.setItem(DISMISS_KEY, "1");
+    localStorage.setItem(DISMISS_KEY, Date.now().toString());
   };
   return /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)(import_jsx_runtime43.Fragment, { children: [
     /* @__PURE__ */ (0, import_jsx_runtime43.jsx)("div", { className: "pointer-events-none fixed inset-x-0 bottom-24 z-40 flex justify-center px-4 sm:bottom-6 sm:justify-end sm:px-6", children: /* @__PURE__ */ (0, import_jsx_runtime43.jsxs)("div", { className: "pointer-events-auto flex items-center gap-2 rounded-full border border-border bg-background/95 px-3 py-2 shadow-lg backdrop-blur", children: [
