@@ -1,18 +1,18 @@
-# Netlify configuration — 416 Records (TanStack Start + Nitro SSR)
-#
-# Nitro "netlify" preset génère automatiquement :
-#   - .netlify/functions-internal/ pour la fonction SSR
-#   - dist/ pour les assets statiques (JS, CSS, images)
-#
-# Node 22 requis : Supabase realtime-js utilise WebSocket natif
-# (absent dans Node 20 → crash SSR à chaque requête)
+# Netlify configuration — 416 Records (SPA mode)
+# Build: esbuild + Tailwind CSS → dist/
 
 [build]
-  command = "bun run build"
+  command = "bash build-spa.sh"
   publish = "dist"
 
 [build.environment]
   NODE_VERSION = "22"
+
+# SPA fallback — toutes les routes vers index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
 
 # Headers de sécurité
 [[headers]]
@@ -22,8 +22,13 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# Cache long pour les assets immuables (hash dans le nom)
+# Cache long pour les assets immuables
 [[headers]]
-  for = "/assets/*"
+  for = "/app.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/app.css"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
