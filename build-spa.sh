@@ -3,12 +3,9 @@ set -e
 
 echo "=== Building 416 Records SPA ==="
 
-# Install esbuild if not present
-which esbuild || npm install -g esbuild
-
 # Build JS with esbuild (minified, production)
 echo "Building JS..."
-esbuild src/spa-entry.tsx \
+npx esbuild src/spa-entry.tsx \
   --bundle \
   --format=esm \
   --target=es2020 \
