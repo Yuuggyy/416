@@ -21,13 +21,13 @@ import { CartDrawer } from "@/components/CartDrawer";
 import { Footer } from "@/components/Footer";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { useBodyGuard } from "@/lib/use-body-guard";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-7xl font-display text-gradient-gold">404</h1>
+        <h1 className="text-7xl font-display" style={{ color: "var(--primary)" }}>404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page introuvable</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Cette page n'existe pas ou a été déplacée.
@@ -35,7 +35,7 @@ function NotFoundComponent() {
         <div className="mt-6">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
           >
             Retour à l'accueil
           </Link>
@@ -56,13 +56,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => { router.invalidate(); reset(); }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
           >
             Réessayer
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground"
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground"
           >
             Accueil
           </a>
@@ -79,10 +79,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "416 Records — Label, films & musique" },
       { name: "description", content: "416 Records — la maison de production. Films, musique et merch en un seul endroit." },
-      { property: "og:title", content: "416 Records — Label, films & musique" },
-      { name: "twitter:title", content: "416 Records — Label, films & musique" },
-      { property: "og:description", content: "416 Records — la maison de production. Films, musique et merch en un seul endroit." },
-      { name: "twitter:description", content: "416 Records — la maison de production. Films, musique et merch en un seul endroit." },
       { name: "theme-color", content: "#0b0b0b" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-title", content: "416 Records" },
@@ -92,43 +88,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/icon-192.png" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap",
-      },
     ],
   }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
 
-function RootShell({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="fr" className="dark">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isLoginPage = pathname === "/login";
 
-  // Global guard: prevents pointer-events:none / overflow:hidden from
-  // getting stuck on <body> after Radix components unmount
   useBodyGuard();
 
-  // Safety net: clear body styles on every navigation
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => {
     const t = setTimeout(() => {
       if (document.body.style.pointerEvents === "none") {
@@ -147,10 +120,10 @@ function RootComponent() {
               <SubscriptionProvider>
               <PlayerProvider>
                 <Outlet />
-                <Footer />
-                <InstallPrompt />
-                <MiniPlayer />
-                <CartDrawer />
+                {!isLoginPage && <Footer />}
+                {!isLoginPage && <InstallPrompt />}
+                {!isLoginPage && <MiniPlayer />}
+                {!isLoginPage && <CartDrawer />}
                 <Toaster />
               </PlayerProvider>
               </SubscriptionProvider>

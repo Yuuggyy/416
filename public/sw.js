@@ -1,12 +1,10 @@
-const CACHE_NAME = '416-records-v9';
+const CACHE_NAME = '416-records-v11';
 const BASE = '/';
 
 // Static assets to precache
 const STATIC_ASSETS = [
-  BASE + 'app.js',
   BASE + 'app.css',
   BASE + 'manifest.webmanifest',
-  BASE + 'favicon.ico',
   BASE + 'icon-192.png',
   BASE + 'icon-512.png',
 ];
@@ -36,7 +34,7 @@ self.addEventListener('fetch', (e) => {
   // Skip external APIs
   if (url.hostname.includes('supabase') || url.hostname.includes('googleapis') || url.hostname.includes('gstatic')) return;
 
-  // Navigation requests — network-first (never serve stale/404 HTML)
+  // Navigation requests — network-first
   if (e.request.mode === 'navigate') {
     e.respondWith(
       fetch(e.request)
@@ -52,7 +50,23 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Static assets — cache-first
+  // JS and CSS — network-first (always get latest version)
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+    e.respondWith(
+      fetch(e.request)
+        .then(response => {
+          if (response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Other static assets — cache-first
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;

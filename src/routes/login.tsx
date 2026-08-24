@@ -44,13 +44,13 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ contain: "content" }}>
-      <div className="relative z-10 w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
           <Film className="h-8 w-8 text-primary" />
-          <span className="font-display text-3xl font-bold text-gradient-gold">416 Records</span>
+          <span className="font-display text-3xl font-bold" style={{ color: "var(--primary)" }}>416 Records</span>
         </Link>
-        <div className="bg-card border border-border rounded-xl p-6 sm:p-8 shadow-lg">
+        <div className="bg-card border border-border rounded-xl p-6 sm:p-8">
           <h1 className="font-display text-3xl font-bold mb-1">
             {mode === "signin" ? "Bon retour" : "Créer un compte"}
           </h1>
@@ -60,11 +60,29 @@ function LoginPage() {
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                style={{ fontSize: "16px", WebkitAppearance: "none" }}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe</Label>
-              <Input id="password" type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+              <Input
+                id="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                minLength={6}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ fontSize: "16px", WebkitAppearance: "none" }}
+              />
             </div>
             <Button type="submit" className="w-full font-semibold" disabled={loading}>
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}

@@ -3,6 +3,8 @@ set -e
 
 echo "=== Building 416 Records SPA ==="
 
+BUILD_TS=$(date +%s)
+
 # Build JS with esbuild (minified, production)
 echo "Building JS..."
 npx esbuild src/spa-entry.tsx \
@@ -29,9 +31,9 @@ cp public/icon-512.png dist/icon-512.png 2>/dev/null || true
 cp public/icon-192-maskable.png dist/icon-192-maskable.png 2>/dev/null || true
 cp public/icon-512-maskable.png dist/icon-512-maskable.png 2>/dev/null || true
 
-# Create index.html
+# Create index.html with cache-busting timestamps
 echo "Creating index.html..."
-cat > dist/index.html << 'HTMLEOF'
+cat > dist/index.html << HTMLEOF
 <!DOCTYPE html>
 <html lang="fr" class="dark">
 <head>
@@ -44,12 +46,12 @@ cat > dist/index.html << 'HTMLEOF'
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="416 Records" />
-  <title>416 Records — Films, musique, une seule maison</title>
-  <link rel="stylesheet" href="/app.css" />
+  <title>416 Records</title>
+  <link rel="stylesheet" href="/app.css?v=${BUILD_TS}" />
 </head>
 <body>
   <div id="root"></div>
-  <script type="module" src="/app.js"></script>
+  <script type="module" src="/app.js?v=${BUILD_TS}"></script>
 </body>
 </html>
 HTMLEOF
