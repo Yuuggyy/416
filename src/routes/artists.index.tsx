@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { SmartImage } from "@/components/SmartImage";
 import { supabase, type Artist } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
@@ -43,7 +44,7 @@ function ArtistsPage() {
             {artists.map((a) => (
               <Link key={a.id} to="/artists/$id" params={{ id: a.id }} className="group">
                 <div className="aspect-square rounded-2xl overflow-hidden bg-secondary border border-border group-hover:border-primary/60 transition-all shadow-lg group-hover:shadow-gold-glow">
-                  {a.photo_url ? <img src={a.photo_url} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" /> : <div className="w-full h-full flex items-center justify-center"><Music className="h-10 w-10 text-muted-foreground" /></div>}
+                  {a.photo_url ? <SmartImage src={a.photo_url} alt={a.name} width={300} quality={70} className="w-full h-full" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center"><Music className="h-10 w-10 text-muted-foreground" /></div>}
                 </div>
                 <h3 className="mt-2 font-semibold text-sm group-hover:text-primary transition-colors">{a.name}</h3>
                 {a.genre && <p className="text-xs text-muted-foreground">{a.genre}</p>}

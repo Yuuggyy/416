@@ -8,6 +8,7 @@ import { MovieRow } from "@/components/MovieRow";
 import { Button } from "@/components/ui/button";
 import { Film, Loader2, Music } from "lucide-react";
 import { useAppSettings } from "@/lib/app-settings";
+import { SmartImage } from "@/components/SmartImage";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -87,7 +88,7 @@ function ArtistsRow({ artists }: { artists: Artist[] }) {
           <Link key={a.id} to="/artists/$id" params={{ id: a.id }} className="group flex-shrink-0 w-32 sm:w-36">
             <div className="aspect-square rounded-full overflow-hidden bg-secondary border border-border group-hover:border-primary/60 transition-all shadow-lg group-hover:shadow-gold-glow">
               {a.photo_url ? (
-                <img src={a.photo_url} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <SmartImage src={a.photo_url} alt={a.name} width={200} quality={70} className="w-full h-full" loading="lazy" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center"><Music className="h-8 w-8 text-muted-foreground" /></div>
               )}

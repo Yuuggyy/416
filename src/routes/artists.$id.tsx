@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { SmartImage } from "@/components/SmartImage";
 import { supabase, type Artist, type Track, type Merch } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
@@ -69,7 +70,7 @@ function ArtistDetail() {
       {/* Hero cover */}
       {artist.cover_url && (
         <div className="relative h-48 sm:h-64 w-full overflow-hidden">
-          <img src={artist.cover_url} alt="" className="w-full h-full object-cover" />
+          <SmartImage src={artist.cover_url} alt="" width={1200} quality={75} className="w-full h-full" loading="eager" />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         </div>
       )}
@@ -77,7 +78,7 @@ function ArtistDetail() {
         {/* Header */}
         <div className="flex items-end gap-4 mb-6">
           <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-secondary border-4 border-background shadow-xl shrink-0">
-            {artist.photo_url ? <img src={artist.photo_url} alt={artist.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Music className="h-10 w-10 text-muted-foreground" /></div>}
+            {artist.photo_url ? <SmartImage src={artist.photo_url} alt={artist.name} width={400} quality={75} className="w-full h-full" /> : <div className="w-full h-full flex items-center justify-center"><Music className="h-10 w-10 text-muted-foreground" /></div>}
           </div>
           <div className="min-w-0 pb-2">
             <h1 className="font-display text-3xl sm:text-5xl font-bold truncate">{artist.name}</h1>

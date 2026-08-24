@@ -2,36 +2,23 @@ import { Link } from "@tanstack/react-router";
 import { Play, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Movie } from "@/lib/supabase";
-
-function imgUrl(url: string | null | undefined, width: number, quality = 75): string {
-  if (!url) return "";
-  if (url.includes(".supabase.co/storage/")) {
-    const sep = url.includes("?") ? "&" : "?";
-    return `${url}${sep}width=${width}&quality=${quality}&format=webp`;
-  }
-  return url;
-}
+import { SmartImage } from "./SmartImage";
 
 export function HeroBanner({ movie }: { movie: Movie }) {
-  // Hero : pleine largeur — 1200px sur desktop, 800px sur mobile
-  const heroSrc = imgUrl(movie.backdrop_url ?? movie.poster_url, 1200, 80);
-  const heroMobileSrc = imgUrl(movie.backdrop_url ?? movie.poster_url, 800, 75);
+  const heroSrc = movie.backdrop_url ?? movie.poster_url;
 
   return (
     <section className="relative h-[70vh] min-h-[420px] sm:h-[85vh] sm:min-h-[520px] w-full overflow-hidden">
       {heroSrc ? (
-        <picture>
-          {/* Mobile : version plus petite */}
-          <source media="(max-width: 640px)" srcSet={heroMobileSrc} />
-          {/* Desktop */}
-          <img
-            src={heroSrc}
-            alt={movie.title}
-            className="absolute inset-0 w-full h-full object-cover"
-            fetchPriority="high"
-            decoding="async"
-          />
-        </picture>
+        <SmartImage
+          src={heroSrc}
+          alt={movie.title}
+          width={1200}
+          quality={75}
+          className="absolute inset-0 w-full h-full"
+          loading="eager"
+          fetchPriority="high"
+        />
       ) : (
         <div className="absolute inset-0 bg-gradient-to-br from-secondary via-card to-background" />
       )}

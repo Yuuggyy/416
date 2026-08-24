@@ -1,3 +1,4 @@
+import { SmartImage } from "./SmartImage";
 import { Play, Pause, X, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import { usePlayer } from "@/lib/player";
 import { useState } from "react";
@@ -36,7 +37,7 @@ export function MiniPlayer() {
           <div className="flex items-center gap-4 px-4 pb-3">
             <div className="w-14 h-14 rounded-xl overflow-hidden bg-secondary shrink-0 shadow-lg">
               {current.cover_url
-                ? <img src={current.cover_url} alt={current.title} className="w-full h-full object-cover" />
+                ? <SmartImage src={current.cover_url} alt={current.title} width={80} quality={70} className="w-full h-full" loading="lazy" />
                 : <div className="w-full h-full flex items-center justify-center text-2xl">🎵</div>
               }
             </div>
@@ -132,7 +133,7 @@ export function MiniPlayer() {
           className="w-10 h-10 rounded-lg overflow-hidden bg-secondary shrink-0 flex items-center justify-center active:scale-90 transition-transform"
         >
           {current.cover_url
-            ? <img src={current.cover_url} alt={current.title} className="w-full h-full object-cover" />
+            ? <SmartImage src={current.cover_url} alt={current.title} width={80} quality={70} className="w-full h-full" loading="lazy" />
             : <span className="text-lg">🎵</span>
           }
         </button>
