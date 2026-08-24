@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase, type Movie, type Artist } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
@@ -19,17 +19,21 @@ function Index() {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(true);
+  const aborted = useRef(false);
 
   useEffect(() => {
+    aborted.current = false;
     if (!user) return;
     Promise.all([
       supabase.from("movies").select("id,title,poster_url,category,genre,year,created_at,featured").order("created_at", { ascending: false }).limit(40),
       supabase.from("artists").select("id,name,photo_url,genre,featured,created_at").order("featured", { ascending: false }).order("created_at", { ascending: false }).limit(40),
     ]).then(([m, a]) => {
+      if (aborted.current) return;
       setMovies((m.data as Movie[]) ?? []);
       setArtists((a.data as Artist[]) ?? []);
       setLoading(false);
     });
+    return () => { aborted.current = true; };
   }, [user]);
 
   if (authLoading) {
@@ -80,12 +84,7 @@ function ArtistsRow({ artists }: { artists: Artist[] }) {
       </div>
       <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1">
         {artists.map((a) => (
-          <Link
-            key={a.id}
-            to="/artists/$id"
-            params={{ id: a.id }}
-            className="group flex-shrink-0 w-32 sm:w-36"
-          >
+          <Link key={a.id} to="/artists/$id" params={{ id: a.id }} className="group flex-shrink-0 w-32 sm:w-36">
             <div className="aspect-square rounded-full overflow-hidden bg-secondary border border-border group-hover:border-primary/60 transition-all shadow-lg group-hover:shadow-gold-glow">
               {a.photo_url ? (
                 <img src={a.photo_url} alt={a.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />

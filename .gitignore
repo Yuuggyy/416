@@ -30,3 +30,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+dist-spa/
+dist-spa-css.css
+gen-icons.js
+public/favicon-base.png

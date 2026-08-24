@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase, type Movie } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Navbar } from "@/components/Navbar";
@@ -8,8 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 const PAGE_SIZE = 24;
-
-// Colonnes légères uniquement — pas de backdrop_url ni description
 const MOVIE_COLS = "id,title,poster_url,category,genre,year,created_at,featured";
 
 export const Route = createFileRoute("/browse")({
@@ -26,6 +24,7 @@ function BrowsePage() {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const aborted = useRef(false);
 
   const fetchPage = async (pageIndex: number, category: string, replace = false) => {
     const from = pageIndex * PAGE_SIZE;
@@ -37,27 +36,33 @@ function BrowsePage() {
       .range(from, to);
     if (category !== "Tous") q = q.eq("category", category);
     const { data } = await q;
+    if (aborted.current) return;
     const items = (data as Movie[]) ?? [];
     setHasMore(items.length === PAGE_SIZE);
     setMovies((prev) => (replace ? items : [...prev, ...items]));
   };
 
   useEffect(() => {
+    aborted.current = false;
     if (authLoading) return;
     if (!user) { navigate({ to: "/login" }); return; }
     setLoading(true);
-    fetchPage(0, filter, true).then(() => { setPage(0); setLoading(false); });
+    fetchPage(0, filter, true).then(() => {
+      if (aborted.current) return;
+      setPage(0);
+      setLoading(false);
+    });
+    return () => { aborted.current = true; };
   }, [user, authLoading, navigate, filter]);
 
   const loadMore = async () => {
     setLoadingMore(true);
     const next = page + 1;
     await fetchPage(next, filter);
-    setPage(next);
+    if (!aborted.current) setPage(next);
     setLoadingMore(false);
   };
 
-  // Catégories : on les tire de ce qui est déjà chargé
   const categories = useMemo(
     () => ["Tous", ...Array.from(new Set(movies.map((m) => m.category).filter(Boolean)))],
     [movies],

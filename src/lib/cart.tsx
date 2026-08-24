@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, useMemo, type ReactNode } from "react";
 import { useAuth } from "./auth";
 import type { Merch } from "./supabase";
 import { toast } from "sonner";
@@ -36,29 +36,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isOpen, setOpen] = useState(false);
   const hydrated = useRef(false);
 
-  // Load cart for current user when user changes
   useEffect(() => {
     hydrated.current = false;
     try {
       const raw = localStorage.getItem(storageKey(uid));
       setItems(raw ? JSON.parse(raw) : []);
-    } catch {
-      setItems([]);
-    }
+    } catch { setItems([]); }
     hydrated.current = true;
   }, [uid]);
 
-  // Persist on changes (after hydration)
   useEffect(() => {
     if (!hydrated.current) return;
     try { localStorage.setItem(storageKey(uid), JSON.stringify(items)); } catch {}
   }, [items, uid]);
 
-  const add = (m: Merch) => {
-    if (!user) {
-      toast.error("Connectez-vous pour ajouter au panier");
-      return false;
-    }
+  // Memoized functions — stable references
+  const add = useMemo(() => (m: Merch) => {
+    if (!user) { toast.error("Connectez-vous pour ajouter au panier"); return false; }
     if (m.price == null) return false;
     setItems((prev) => {
       const found = prev.find((i) => i.id === m.id);
@@ -67,22 +61,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
     setOpen(true);
     return true;
-  };
+  }, [user]);
 
-  const remove = (id: string) => setItems((p) => p.filter((i) => i.id !== id));
-  const setQty = (id: string, qty: number) =>
-    setItems((p) => qty <= 0 ? p.filter((i) => i.id !== id) : p.map((i) => i.id === id ? { ...i, quantity: qty } : i));
-  const clear = () => setItems([]);
+  const remove = useMemo(() => (id: string) => setItems((p) => p.filter((i) => i.id !== id)), []);
+  const setQty = useMemo(() => (id: string, qty: number) =>
+    setItems((p) => qty <= 0 ? p.filter((i) => i.id !== id) : p.map((i) => i.id === id ? { ...i, quantity: qty } : i)), []);
+  const clear = useMemo(() => () => setItems([]), []);
 
-  const count = items.reduce((s, i) => s + i.quantity, 0);
-  const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
-  const currency = items[0]?.currency ?? "EUR";
+  const value = useMemo<CartCtx>(() => {
+    const count = items.reduce((s, i) => s + i.quantity, 0);
+    const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
+    return {
+      items, count, total,
+      currency: items[0]?.currency ?? "EUR",
+      isOpen,
+      open: () => setOpen(true),
+      close: () => setOpen(false),
+      add, remove, setQty, clear,
+    };
+  }, [items, isOpen, add, remove, setQty, clear]);
 
-  return (
-    <Ctx.Provider value={{ items, count, total, currency, isOpen, open: () => setOpen(true), close: () => setOpen(false), add, remove, setQty, clear }}>
-      {children}
-    </Ctx.Provider>
-  );
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
 export function useCart() {

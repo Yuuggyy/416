@@ -3,12 +3,12 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
-  useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
 
-import appCss from "../styles.css?url";
+const appCss = "/app.css";
 import { AuthProvider } from "@/lib/auth";
 import { Toaster } from "@/components/ui/sonner";
 import { AppSettingsProvider } from "@/lib/app-settings";
@@ -20,6 +20,8 @@ import { SubscriptionProvider } from "@/lib/subscription";
 import { CartDrawer } from "@/components/CartDrawer";
 import { Footer } from "@/components/Footer";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { useBodyGuard } from "@/lib/use-body-guard";
+import { useEffect } from "react";
 
 function NotFoundComponent() {
   return (
@@ -45,7 +47,7 @@ function NotFoundComponent() {
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
-  const router = useRouter();
+  const router = useRouterState();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
@@ -74,17 +76,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "416 Records — Label, films & musique" },
       { name: "description", content: "416 Records — la maison de production. Films, musique et merch en un seul endroit." },
       { property: "og:title", content: "416 Records — Label, films & musique" },
       { name: "twitter:title", content: "416 Records — Label, films & musique" },
       { property: "og:description", content: "416 Records — la maison de production. Films, musique et merch en un seul endroit." },
       { name: "twitter:description", content: "416 Records — la maison de production. Films, musique et merch en un seul endroit." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/de33a6d6-e04b-47e2-8a5b-de3bbe520fa7/id-preview-0b1aed3f--3919f029-39cf-4448-b336-d162720bb875.lovable.app-1781903204191.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/de33a6d6-e04b-47e2-8a5b-de3bbe520fa7/id-preview-0b1aed3f--3919f029-39cf-4448-b336-d162720bb875.lovable.app-1781903204191.png" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:type", content: "website" },
       { name: "theme-color", content: "#0b0b0b" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-title", content: "416 Records" },
@@ -93,7 +91,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "apple-touch-icon", href: "/favicon.ico" },
+      { rel: "apple-touch-icon", href: "/icon-192.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -124,6 +122,22 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  // Global guard: prevents pointer-events:none / overflow:hidden from
+  // getting stuck on <body> after Radix components unmount
+  useBodyGuard();
+
+  // Safety net: clear body styles on every navigation
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (document.body.style.pointerEvents === "none") {
+        document.body.style.pointerEvents = "";
+      }
+    }, 100);
+    return () => clearTimeout(t);
+  }, [pathname]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>

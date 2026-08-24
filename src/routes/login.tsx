@@ -34,7 +34,7 @@ function LoginPage() {
         navigate({ to: "/" });
       } else {
         await signUp(email, password);
-        toast.success("Compte créé. Vérifie ta boîte mail si la confirmation est activée.");
+        toast.success("Compte créé.");
       }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erreur");
@@ -44,14 +44,13 @@ function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--gold)_/_0.1,_transparent_60%)]" />
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ contain: "content" }}>
       <div className="relative z-10 w-full max-w-md">
         <Link to="/" className="flex items-center justify-center gap-2 mb-8">
           <Film className="h-8 w-8 text-primary" />
           <span className="font-display text-3xl font-bold text-gradient-gold">416 Records</span>
         </Link>
-        <div className="bg-card/80 backdrop-blur-md border border-border rounded-xl p-6 sm:p-8 shadow-gold-glow">
+        <div className="bg-card border border-border rounded-xl p-6 sm:p-8 shadow-lg">
           <h1 className="font-display text-3xl font-bold mb-1">
             {mode === "signin" ? "Bon retour" : "Créer un compte"}
           </h1>

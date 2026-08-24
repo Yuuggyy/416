@@ -1,12 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { supabase, type Movie } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, Plus, Check, Share2, Clock, Calendar, Tag } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { toast } from "sonner";
-
 
 function imgUrl(url: string | null | undefined, width: number, quality = 75): string {
   if (!url) return "";
@@ -30,32 +29,45 @@ function WatchPage() {
   const [loading, setLoading] = useState(true);
   const [inList, setInList] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
+  const aborted = useRef(false);
 
   useEffect(() => {
+    aborted.current = false;
     if (authLoading) return;
     if (!user) { navigate({ to: "/login" }); return; }
+
     (async () => {
-      const { data } = await supabase.from("movies").select("*").eq("id", id).maybeSingle();
-      const m = data as Movie | null;
-      setMovie(m);
-      if (m) {
-        const { data: wl } = await supabase.from("watchlist").select("movie_id")
-          .eq("user_id", user.id).eq("movie_id", id).maybeSingle();
-        setInList(!!wl);
-        // Suggestions: même catégorie, sauf ce film
-        const { data: sugg } = await supabase.from("movies").select("*")
-          .eq("category", m.category).neq("id", id).limit(8);
-        if (sugg && sugg.length > 0) {
-          setSuggestions(sugg as Movie[]);
-        } else {
-          // Si pas assez dans la même catégorie, prendre les derniers
-          const { data: recent } = await supabase.from("movies").select("id,title,poster_url,category,genre,year,created_at,featured")
-            .neq("id", id).order("created_at", { ascending: false }).limit(8);
-          setSuggestions((recent as Movie[]) ?? []);
+      try {
+        const { data } = await supabase.from("movies").select("*").eq("id", id).maybeSingle();
+        if (aborted.current) return;
+        const m = data as Movie | null;
+        setMovie(m);
+        if (m) {
+          const { data: wl } = await supabase.from("watchlist").select("movie_id")
+            .eq("user_id", user.id).eq("movie_id", id).maybeSingle();
+          if (aborted.current) return;
+          setInList(!!wl);
+
+          const { data: sugg } = await supabase.from("movies").select("*")
+            .eq("category", m.category).neq("id", id).limit(8);
+          if (aborted.current) return;
+          if (sugg && sugg.length > 0) {
+            setSuggestions(sugg as Movie[]);
+          } else {
+            const { data: recent } = await supabase.from("movies")
+              .select("id,title,poster_url,category,genre,year,created_at,featured")
+              .neq("id", id).order("created_at", { ascending: false }).limit(8);
+            if (aborted.current) return;
+            setSuggestions((recent as Movie[]) ?? []);
+          }
         }
+        if (!aborted.current) setLoading(false);
+      } catch {
+        if (!aborted.current) setLoading(false);
       }
-      setLoading(false);
     })();
+
+    return () => { aborted.current = true; };
   }, [id, user, authLoading, navigate]);
 
   const toggleList = async () => {
@@ -75,7 +87,7 @@ function WatchPage() {
     if (!movie) return;
     const url = typeof window !== "undefined" ? window.location.href : "";
     try {
-      if (typeof navigator !== "undefined" && navigator.share) {
+      if (navigator.share) {
         await navigator.share({ title: movie.title, text: `Regarde « ${movie.title} » sur 416 Records`, url });
         return;
       }
@@ -112,7 +124,6 @@ function WatchPage() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      {/* Bouton retour flottant */}
       <div className="fixed top-4 left-4 z-50">
         <button
           onClick={() => navigate({ to: "/" })}
@@ -123,7 +134,7 @@ function WatchPage() {
         </button>
       </div>
 
-      {/* Player — sticky sur mobile */}
+      {/* Player */}
       <div className="sticky top-0 z-40 bg-black w-full" style={{ aspectRatio: "16/9", maxHeight: "56vw" }}>
         {ytId ? (
           <iframe
@@ -145,13 +156,11 @@ function WatchPage() {
         )}
       </div>
 
-      {/* Infos film */}
+      {/* Infos */}
       <div className="px-4 sm:px-6 py-5 max-w-5xl mx-auto">
-        {/* Titre + actions */}
         <div className="mb-4">
           <h1 className="font-display text-2xl sm:text-4xl font-bold mb-2 leading-tight">{movie.title}</h1>
 
-          {/* Meta badges */}
           <div className="flex flex-wrap gap-2 mb-4">
             {movie.year && (
               <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-secondary px-2.5 py-1 rounded-full">
@@ -173,14 +182,11 @@ function WatchPage() {
             </span>
           </div>
 
-          {/* Boutons actions — taille tactile sur mobile */}
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={toggleList}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-semibold transition-all active:scale-95 ${
-                inList
-                  ? "bg-secondary text-foreground border border-border"
-                  : "bg-primary text-primary-foreground shadow-gold-glow"
+                inList ? "bg-secondary text-foreground border border-border" : "bg-primary text-primary-foreground shadow-gold-glow"
               }`}
             >
               {inList ? <><Check className="h-4 w-4" /> Ma liste</> : <><Plus className="h-4 w-4" /> Ma liste</>}
@@ -194,7 +200,6 @@ function WatchPage() {
           </div>
         </div>
 
-        {/* Description avec expand/collapse sur mobile */}
         {movie.description && (
           <div className="mb-6">
             <p className={`text-sm sm:text-base text-foreground/85 leading-relaxed ${descExpanded ? "" : "line-clamp-3 sm:line-clamp-none"}`}>
@@ -209,13 +214,9 @@ function WatchPage() {
           </div>
         )}
 
-        {/* Suggestions */}
         {suggestions.length > 0 && (
           <section>
-            <h2 className="font-display text-lg sm:text-2xl font-semibold mb-3 text-foreground">
-              À voir aussi
-            </h2>
-            {/* Scroll horizontal sur mobile, grille sur desktop */}
+            <h2 className="font-display text-lg sm:text-2xl font-semibold mb-3 text-foreground">À voir aussi</h2>
             <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 md:grid-cols-4 sm:gap-4 sm:overflow-visible">
               {suggestions.map((s) => (
                 <div key={s.id} className="flex-shrink-0 w-[140px] sm:w-auto">
