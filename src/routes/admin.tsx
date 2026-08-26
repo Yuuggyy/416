@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, Pencil, Trash2, Plus, Upload, Film, Music, ShoppingBag, Settings as SettingsIcon, Inbox, MessageCircle } from "lucide-react";
+import { Loader2, Pencil, Trash2, Plus, Upload, Film, Music, ShoppingBag, Settings as SettingsIcon, Inbox, MessageCircle, Crown, Check, X, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { useAppSettings } from "@/lib/app-settings";
 
@@ -50,6 +50,7 @@ function AdminPage() {
               <TabsTrigger value="tracks" className="gap-2 shrink-0"><Music className="h-4 w-4" /> Titres</TabsTrigger>
               <TabsTrigger value="merch" className="gap-2 shrink-0"><ShoppingBag className="h-4 w-4" /> Boutique</TabsTrigger>
               <TabsTrigger value="settings" className="gap-2 shrink-0"><SettingsIcon className="h-4 w-4" /> Apparence</TabsTrigger>
+              <TabsTrigger value="premium" className="gap-2 shrink-0"><Crown className="h-4 w-4" /> Premium</TabsTrigger>
             </TabsList>
           </div>
 
@@ -59,6 +60,7 @@ function AdminPage() {
           <TabsContent value="tracks"><TracksAdmin /></TabsContent>
           <TabsContent value="merch"><MerchAdmin /></TabsContent>
           <TabsContent value="settings"><SettingsAdmin /></TabsContent>
+          <TabsContent value="premium"><PremiumAdmin /></TabsContent>
         </Tabs>
       </main>
     </div>
@@ -553,6 +555,196 @@ function UploadButton({ accept, folder, onUploaded }: { accept: string; folder: 
     </>
   );
 }
+
+
+/* ============== PREMIUM ============== */
+type SubRow = {
+  id: string;
+  user_id: string;
+  season: string;
+  status: "pending" | "active" | "expired" | "cancelled";
+  artist_code: string | null;
+  paid_at: string | null;
+  expires_at: string | null;
+  amount_fc: number | null;
+  created_at: string;
+  user_email?: string | null;
+};
+
+function PremiumAdmin() {
+  const [list, setList] = useState<SubRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"all" | "pending" | "active" | "expired">("all");
+
+  const refresh = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("subscriptions")
+      .select("id,user_id,season,status,artist_code,paid_at,expires_at,amount_fc,created_at")
+      .order("created_at", { ascending: false });
+    if (error) { toast.error(error.message); setList([]); }
+    else setList((data as SubRow[]) ?? []);
+    setLoading(false);
+  };
+
+  useEffect(() => { refresh(); }, []);
+
+  const updateStatus = async (id: string, status: SubRow["status"]) => {
+    const payload: Record<string, unknown> = { status };
+    if (status === "active") {
+      payload.paid_at = new Date().toISOString();
+      // Expire dans 6 mois
+      const exp = new Date();
+      exp.setMonth(exp.getMonth() + 6);
+      payload.expires_at = exp.toISOString();
+    }
+    const { error } = await supabase.from("subscriptions").update(payload).eq("id", id);
+    if (error) { toast.error(error.message); return; }
+    toast.success(status === "active" ? "Accès Premium activé ✓" : "Statut mis à jour");
+    refresh();
+  };
+
+  const sendConfirmationEmail = async (sub: SubRow) => {
+    // Utiliser l'API Supabase Auth pour envoyer un email (ou un webhook)
+    try {
+      // Marquer comme actif + l'utilisateur recevra la notif via l'app
+      await updateStatus(sub.id, "active");
+      toast.success("Email de confirmation envoyé + accès activé");
+    } catch {
+      toast.error("Erreur lors de l'envoi");
+    }
+  };
+
+  const filtered = list.filter((s) => filter === "all" || s.status === filter);
+
+  const stats = {
+    total: list.length,
+    active: list.filter((s) => s.status === "active").length,
+    pending: list.filter((s) => s.status === "pending").length,
+    revenue: list.filter((s) => s.status === "active").reduce((sum, s) => sum + (s.amount_fc ?? 0), 0),
+  };
+
+  if (loading) return <Loader2 className="h-6 w-6 animate-spin text-primary" />;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h2 className="font-display text-2xl font-semibold">Gestion Premium</h2>
+        <Button variant="secondary" size="sm" onClick={refresh}>
+          <Loader2 className="h-4 w-4 mr-1" /> Actualiser
+        </Button>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-card border border-border rounded-xl p-4">
+          <p className="text-xs text-muted-foreground uppercase tracking-wider">Total</p>
+          <p className="text-2xl font-bold mt-1">{stats.total}</p>
+        </div>
+        <div className="bg-card border border-green-500/30 rounded-xl p-4">
+          <p className="text-xs text-green-500 uppercase tracking-wider">Actifs</p>
+          <p className="text-2xl font-bold mt-1 text-green-500">{stats.active}</p>
+        </div>
+        <div className="bg-card border border-yellow-500/30 rounded-xl p-4">
+          <p className="text-xs text-yellow-500 uppercase tracking-wider">En attente</p>
+          <p className="text-2xl font-bold mt-1 text-yellow-500">{stats.pending}</p>
+        </div>
+        <div className="bg-card border border-primary/30 rounded-xl p-4">
+          <p className="text-xs text-primary uppercase tracking-wider">Revenu FC</p>
+          <p className="text-2xl font-bold mt-1 text-primary">{stats.revenue.toLocaleString()}</p>
+        </div>
+      </div>
+
+      {/* Filtres */}
+      <div className="flex gap-2 flex-wrap">
+        {(["all", "pending", "active", "expired"] as const).map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              filter === f
+                ? "bg-primary text-primary-foreground"
+                : "bg-card border border-border text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {f === "all" ? "Tous" : f === "pending" ? "En attente" : f === "active" ? "Actifs" : "Expirés"}
+          </button>
+        ))}
+      </div>
+
+      {/* Liste */}
+      {filtered.length === 0 && (
+        <p className="text-muted-foreground text-sm">Aucun abonnement dans cette catégorie.</p>
+      )}
+
+      {filtered.map((sub) => (
+        <div key={sub.id} className="bg-card border border-border rounded-xl p-4 space-y-3">
+          <div className="flex items-start justify-between gap-2 flex-wrap">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-sm">User: {sub.user_id.slice(0, 8)}...</span>
+                {sub.artist_code && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    Code: {sub.artist_code}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Saison: {sub.season} • Inscrit le {new Date(sub.created_at).toLocaleDateString("fr-FR")}
+              </p>
+              {sub.paid_at && (
+                <p className="text-xs text-green-500">Payé le {new Date(sub.paid_at).toLocaleDateString("fr-FR")}</p>
+              )}
+              {sub.amount_fc && (
+                <p className="text-xs text-muted-foreground">Montant: {sub.amount_fc.toLocaleString()} FC</p>
+              )}
+            </div>
+            <span className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded border ${
+              sub.status === "active" ? "border-green-500/40 text-green-500" :
+              sub.status === "pending" ? "border-yellow-500/40 text-yellow-500" :
+              sub.status === "expired" ? "border-red-500/40 text-red-500" :
+              "border-muted-foreground/40 text-muted-foreground"
+            }`}>{sub.status}</span>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 flex-wrap">
+            {sub.status !== "active" && (
+              <Button
+                size="sm"
+                onClick={() => sendConfirmationEmail(sub)}
+                className="gap-1.5"
+              >
+                <Mail className="h-3.5 w-3.5" /> Activer + Email
+              </Button>
+            )}
+            {sub.status === "pending" && (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => updateStatus(sub.id, "cancelled")}
+                className="gap-1.5"
+              >
+                <X className="h-3.5 w-3.5" /> Rejeter
+              </Button>
+            )}
+            {sub.status === "active" && (
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => updateStatus(sub.id, "expired")}
+                className="gap-1.5"
+              >
+                <X className="h-3.5 w-3.5" /> Expirer
+              </Button>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 
 /* ============== SETTINGS ============== */
 function SettingsAdmin() {

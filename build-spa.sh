@@ -47,6 +47,9 @@ cat > dist/index.html << HTMLEOF
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="416 Records" />
   <title>416 Records</title>
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6614933308950023"
+     crossorigin="anonymous"></script>
   <style>
     /* Loading state inline — affiché immédiatement avant que le JS se charge */
     #app-loading {

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tv2, Check, X, Loader2, Ticket, Star, Zap } from "lucide-react";
 import { toast } from "sonner";
+import { initiatePayment, PAYMENT_METHODS, FLW_PUBLIC_KEY } from "@/lib/payment";
 
 export const Route = createFileRoute("/premium")({
   component: PremiumPage,
@@ -53,36 +54,70 @@ function PremiumPage() {
     );
   }
 
-  // Demande enregistrée, en attente de confirmation
+  // Paiement via Flutterwave (M-Pesa, Airtel, Orange Money)
+  const [selectedMethod, setSelectedMethod] = useState("mpesa");
+  const [phoneNumber, setPhoneNumber] = useState("");
+
   const handleRequest = async () => {
     if (!user) return;
+    if (!phoneNumber.trim()) { toast.error("Entrez votre numéro de téléphone"); return; }
+
     setSaving(true);
-    try {
-      // Créer une entrée "pending" — l'admin confirmera après paiement WhatsApp
-      const { error } = await supabase.from("subscriptions").upsert({
-        user_id: user.id,
-        season: CURRENT_SEASON,
-        status: "pending",
-        artist_code: artistCode.trim() || null,
-        amount_fc: SEASON_PRICE_FC,
-      }, { onConflict: "user_id,season" });
 
-      if (error) throw error;
+    // Étape 1: Créer une entrée "pending"
+    const { error: subError } = await supabase.from("subscriptions").upsert({
+      user_id: user.id,
+      season: CURRENT_SEASON,
+      status: "pending",
+      artist_code: artistCode.trim() || null,
+      amount_fc: SEASON_PRICE_FC,
+    }, { onConflict: "user_id,season" });
 
-      // Ouvrir WhatsApp avec le message pré-rempli
-      const msg = encodeURIComponent(
-        `🎬 Demande d'accès Saison S1 — 416 Records\n\nEmail: ${user.email}\nMontant: ${SEASON_PRICE_FC} FC\n${artistCode.trim() ? `Code artiste: ${artistCode.trim()}` : ""}\n\nJ'ai envoyé le paiement et j'attends la confirmation d'accès.`
-      );
-      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank");
-
-      setRequested(true);
-      refresh();
-      toast.success("Demande enregistrée ! L'équipe 416 confirme votre accès.");
-    } catch (e: any) {
-      toast.error("Erreur : " + (e?.message ?? "réessayez"));
-    } finally {
+    if (subError) {
+      toast.error("Erreur: " + subError.message);
       setSaving(false);
+      return;
     }
+
+    // Étape 2: Lancer le paiement Flutterwave
+    const result = await initiatePayment(
+      SEASON_PRICE_FC,
+      { email: user.email || "", phone: phoneNumber, name: user.email?.split("@")[0] },
+      selectedMethod
+    );
+
+    if (result.success && result.transactionId) {
+      // Étape 3: Activer le premium automatiquement
+      const { error: activateError } = await supabase.from("subscriptions").update({
+        status: "active",
+        paid_at: new Date().toISOString(),
+        transaction_id: result.transactionId,
+      }).eq("user_id", user.id).eq("season", CURRENT_SEASON);
+
+      if (!activateError) {
+        toast.success("Paiement réussi ! Votre accès Premium est activé 🎉");
+        setRequested(true);
+        refresh();
+      } else {
+        toast.success("Paiement reçu ! Activation en cours (l'admin confirme sous 24h).");
+        refresh();
+      }
+    } else {
+      // Fallback: si Flutterwave n'est pas configuré, garder le système WhatsApp
+      if (!FLW_PUBLIC_KEY) {
+        const msg = encodeURIComponent(
+          `🎬 Demande d'accès Saison S1 — 416 Records\n\nEmail: ${user.email}\nMontant: ${SEASON_PRICE_FC} FC\n${artistCode.trim() ? `Code artiste: ${artistCode.trim()}` : ""}\n\nJ'ai envoyé le paiement et j'attends la confirmation d'accès.`
+        );
+        window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank");
+        toast.success("Demande enregistrée ! L'équipe 416 confirme votre accès.");
+        setRequested(true);
+        refresh();
+      } else {
+        toast.error(result.message || "Paiement échoué");
+      }
+    }
+
+    setSaving(false);
   };
 
   return (
@@ -171,6 +206,44 @@ function PremiumPage() {
                 </p>
               </div>
 
+              {/* Numéro de téléphone */}
+              <div className="mt-5 text-left">
+                <Label htmlFor="phone" className="text-xs text-muted-foreground">
+                  Numéro de téléphone (Mobile Money)
+                </Label>
+                <Input
+                  id="phone"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="Ex: +243 8xx xxx xxx"
+                  className="mt-1"
+                  type="tel"
+                  style={{ fontSize: "16px" }}
+                />
+              </div>
+
+              {/* Choix du moyen de paiement */}
+              <div className="mt-4 text-left">
+                <Label className="text-xs text-muted-foreground mb-2 block">Moyen de paiement</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {PAYMENT_METHODS.map((method) => (
+                    <button
+                      key={method.id}
+                      type="button"
+                      onClick={() => setSelectedMethod(method.flwOption)}
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-medium transition-all ${
+                        selectedMethod === method.flwOption
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border bg-card text-muted-foreground"
+                      }`}
+                    >
+                      <span className="text-base">{method.icon}</span>
+                      {method.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <Button
                 size="lg"
                 className="w-full mt-5 font-bold text-base shadow-gold-glow h-12 touch-manipulation"
@@ -178,8 +251,8 @@ function PremiumPage() {
                 disabled={saving || requested}
               >
                 {saving
-                  ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Enregistrement…</>
-                  : <><Ticket className="h-4 w-4 mr-2" />Obtenir l'accès — {SEASON_PRICE_FC.toLocaleString()} FC</>
+                  ? <><Loader2 className="h-4 w-4 animate-spin mr-2" />Paiement en cours…</>
+                  : <><Ticket className="h-4 w-4 mr-2" />Payer {SEASON_PRICE_FC.toLocaleString()} FC</>
                 }
               </Button>
             </div>
@@ -191,10 +264,10 @@ function PremiumPage() {
               </p>
               <ol className="space-y-2.5">
                 {[
-                  `Envoie ${SEASON_PRICE_FC.toLocaleString()} FC via Mobile Money (Airtel, M-Pesa, Orange) ou en espèces`,
-                  "Clique sur le bouton ci-dessus — tu arrives sur WhatsApp avec ton reçu",
-                  "L'équipe 416 confirme ton paiement et active ton accès (max 24h)",
-                  "Tu reçois une notification et ton badge Premium apparaît",
+                  `Choisis ton moyen de paiement (M-Pesa, Airtel Money, Orange Money)`,
+                  "Entre ton numéro de téléphone et clique sur Payer",
+                  "Confirme le paiement sur ton téléphone (push notification)",
+                  "Ton accès Premium s'active automatiquement — sans pub !",
                 ].map((s, i) => (
                   <li key={i} className="flex gap-3 items-start">
                     <span className="shrink-0 w-5 h-5 rounded-full bg-primary/20 text-primary text-[10px] flex items-center justify-center font-bold mt-0.5">
