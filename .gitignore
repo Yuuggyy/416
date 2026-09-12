@@ -34,7 +34,4 @@ dist-spa/
 dist-spa-css.css
 gen-icons.js
 public/favicon-base.png
-*.zip
-runlogs.zip
-jobs.json
-job.json
+android/keystore/
