@@ -1,21 +1,25 @@
 name: Deploy to GitHub Pages
 
+# Deploie le build SPA (build-pages.sh) sur la branche gh-pages.
+# Le site Pages du repo est configure en mode legacy : source = branche gh-pages.
+# Note : necessite un compte GitHub sans blocage de facturation.
+
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "README.md"
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,21 +33,13 @@ jobs:
       - name: Install dependencies
         run: npm install --no-audit --no-fund
 
-      - name: Build SPA (GitHub Pages, sous-dossier /416/)
+      - name: Build SPA (sous-dossier /416/)
         run: bash build-pages.sh
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy vers la branche gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true
+          commit_message: "Deploy: ${{ github.event.head_commit.message }}"
