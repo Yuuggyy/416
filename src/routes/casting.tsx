@@ -15,8 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Loader2, Send, Heart, Users, Video, Trophy, Loader } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
+import { Loader2, Send, Heart, Users, Video, Trophy, Loader, MousePointerClick } from "lucide-react";
 import { toast } from "sonner";
 import {
   CASTING,
@@ -34,6 +34,8 @@ function CastingPage() {
   const [apps, setApps] = useState<CastingApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [votedIds, setVotedIds] = useState<Set<string>>(new Set());
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const sessionLikesRef = useRef(0);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -76,7 +78,20 @@ function CastingPage() {
         a.id === app.id ? { ...a, votes: [{ count: (a.votes?.[0]?.count ?? 0) + 1 }] } : a
       )
     );
-    toast.success("Vote enregistré. Merci de soutenir ce candidat !");
+    sessionLikesRef.current += 1;
+    if (sessionLikesRef.current === 1) {
+      // Premier like de la session : invitation officielle au vote
+      toast.success("Vote enregistré !");
+      setInviteOpen(true);
+    } else {
+      const nudges = [
+        "Encore un vote ! Le public compte pour 40 % de la sélection.",
+        "Continue — 4 candidats seront repêchés par les likes seuls.",
+        "Chaque like fait monter ton artiste au classement.",
+        "Ton vote peut envoyer quelqu'un au parking de l'Épisode 1.",
+      ];
+      toast.success(nudges[(sessionLikesRef.current - 2) % nudges.length]);
+    }
   }
 
   const totalLikes = apps.reduce((sum, a) => sum + (a.votes?.[0]?.count ?? 0), 0);
@@ -127,6 +142,38 @@ function CastingPage() {
           </p>
         </section>
 
+        {/* ---------- INVITATION AU VOTE (s'ouvre au premier like) ---------- */}
+        <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+          <DialogContent className="sm:max-w-sm text-center">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-center gap-2">
+                <MousePointerClick className="h-5 w-5 text-primary" />
+                Ton like compte !
+              </DialogTitle>
+              <DialogDescription className="text-left space-y-3 pt-1">
+                <p>
+                  Tu viens de voter pour un artiste. Scrolle la galerie et like
+                  tes artistes préférés : <strong>le public pèse 40 % du score final</strong>,
+                  et <strong>4 candidats seront repêchés rien que par les likes</strong>.
+                </p>
+                <p className="text-xs">
+                  36 places se jouent au score composite (jury 60 % + likes 40 %),
+                  4 autres au classement des likes. Vote jusqu'au 15 novembre 2026.
+                </p>
+              </DialogDescription>
+            </DialogHeader>
+            <Button
+              className="w-full gap-2"
+              onClick={() => {
+                setInviteOpen(false);
+                document.getElementById("casting-gallery")?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
+              <Heart className="h-4 w-4" /> Scroller et liker mes préférés
+            </Button>
+          </DialogContent>
+        </Dialog>
+
         {/* ---------- GALERIE ---------- */}
         {loading ? (
           <div className="flex justify-center py-16"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
@@ -135,7 +182,7 @@ function CastingPage() {
             Aucune candidature validée pour l'instant. Sois le premier à participer.
           </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div id="casting-gallery" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 scroll-mt-28">
             {apps.map((app) => {
               const likes = app.votes?.[0]?.count ?? 0;
               const voted = votedIds.has(app.id);
