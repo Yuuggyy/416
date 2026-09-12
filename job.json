@@ -1,0 +1,29 @@
+{
+  "id": 103563215316,
+  "run_id": 34697431362,
+  "workflow_name": "Deploy to GitHub Pages",
+  "head_branch": "main",
+  "run_url": "https://api.github.com/repos/Yuuggyy/416/actions/runs/34697431362",
+  "run_attempt": 1,
+  "node_id": "CR_kwDOS_sjtM8AAAAYHNlB1A",
+  "head_sha": "565957a732e446bbd2a0177ec7a01a59f15d6529",
+  "url": "https://api.github.com/repos/Yuuggyy/416/actions/jobs/103563215316",
+  "html_url": "https://github.com/Yuuggyy/416/actions/runs/34697431362/job/103563215316",
+  "status": "completed",
+  "conclusion": "failure",
+  "created_at": "2026-09-12T13:48:09Z",
+  "started_at": "2026-09-12T13:48:09Z",
+  "completed_at": "2026-09-12T13:48:11Z",
+  "name": "build",
+  "steps": [
+
+  ],
+  "check_run_url": "https://api.github.com/repos/Yuuggyy/416/check-runs/103563215316",
+  "labels": [
+    "ubuntu-latest"
+  ],
+  "runner_id": 0,
+  "runner_name": "",
+  "runner_group_id": 0,
+  "runner_group_name": ""
+}
