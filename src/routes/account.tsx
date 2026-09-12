@@ -8,7 +8,7 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Camera, Loader2, LogOut, ShieldCheck, User as UserIcon } from "lucide-react";
+import { Camera, Loader2, LogOut, ShieldCheck, BadgeCheck, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/account")({
@@ -18,12 +18,14 @@ export const Route = createFileRoute("/account")({
 
 function AccountPage() {
   const { user, isAdmin, loading: authLoading, signOut } = useAuth();
-  const { isPremium, plan } = useSubscription();
+  const { isPremium, isArtist, accountType, profile, refresh: refreshSub } = useSubscription();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [count, setCount] = useState<number | null>(null);
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [artistName, setArtistName] = useState("");
+  const [savingArtistName, setSavingArtistName] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
@@ -31,6 +33,10 @@ function AccountPage() {
     const url = (user?.user_metadata as { avatar_url?: string } | undefined)?.avatar_url ?? null;
     setAvatar(url);
   }, [user]);
+
+  useEffect(() => {
+    setArtistName(profile?.artist_name ?? "");
+  }, [profile?.artist_name]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -193,15 +199,62 @@ function AccountPage() {
               <p className="font-display text-2xl font-bold text-gradient-gold">{count ?? "—"}</p>
               <p className="text-xs text-muted-foreground mt-1">Films dans ma liste</p>
             </div>
-            <div className={`rounded-lg p-4 text-center ${isPremium ? "bg-primary/10 border border-primary/30" : "bg-secondary/40"}`}>
-              <p className="font-display text-2xl font-bold text-gradient-gold">{isPremium ? "✨" : "Free"}</p>
-              <p className="text-xs text-muted-foreground mt-1">{isPremium ? "Compte Premium" : "Compte gratuit"}</p>
-              {!isPremium && (
-                <Link to="/premium" className="text-[10px] text-primary font-semibold hover:underline mt-1 block">Passer Premium →</Link>
+            <div className={`rounded-lg p-4 text-center ${accountType === "artist" ? "bg-primary/10 border border-primary/30" : isPremium ? "bg-primary/10 border border-primary/30" : "bg-secondary/40"}`}>
+              {isArtist ? (
+                <>
+                  <p className="font-display text-2xl font-bold text-primary flex items-center justify-center gap-1.5"><BadgeCheck className="h-6 w-6" /> {profile?.artist_name || "Artiste"}</p>
+                  <p className="text-xs text-muted-foreground mt-1">Compte Artiste vérifié</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-display text-2xl font-bold text-gradient-gold">{isPremium ? "✨" : "Free"}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{isPremium ? "Compte Premium" : "Compte gratuit"}</p>
+                  {!isPremium && (
+                    <Link to="/premium" className="text-[10px] text-primary font-semibold hover:underline mt-1 block">Passer Premium →</Link>
+                  )}
+                </>
               )}
             </div>
           </div>
         </section>
+
+        {isArtist && (
+          <section className="bg-card border border-border rounded-xl p-4 sm:p-6">
+            <h2 className="font-display text-xl font-semibold mb-1 flex items-center gap-2">
+              <BadgeCheck className="h-5 w-5 text-primary" /> Mon nom d'artiste
+            </h2>
+            <p className="text-xs text-muted-foreground mb-4">
+              Affiché avec le badge « Artiste vérifié » sur tes quicks et clips.
+            </p>
+            <form
+              onSubmit={async (e: FormEvent) => {
+                e.preventDefault();
+                if (!user) return;
+                if (!artistName.trim()) { toast.error("Le nom d'artiste ne peut pas être vide."); return; }
+                setSavingArtistName(true);
+                const { error } = await supabase
+                  .from("profiles")
+                  .update({ artist_name: artistName.trim() })
+                  .eq("id", user.id);
+                setSavingArtistName(false);
+                if (error) { toast.error(error.message); return; }
+                toast.success("Nom d'artiste mis à jour");
+                refreshSub();
+              }}
+              className="flex gap-2"
+            >
+              <Input
+                value={artistName}
+                onChange={(e) => setArtistName(e.target.value)}
+                placeholder="Ex. Yuggy"
+                className="max-w-xs"
+              />
+              <Button type="submit" disabled={savingArtistName} className="gap-1.5">
+                {savingArtistName ? <Loader2 className="h-4 w-4 animate-spin" /> : null} Enregistrer
+              </Button>
+            </form>
+          </section>
+        )}
 
         <section className="bg-card border border-border rounded-xl p-4 sm:p-6">
           <h2 className="font-display text-xl font-semibold mb-4">Changer de mot de passe</h2>

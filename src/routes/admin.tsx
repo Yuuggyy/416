@@ -13,8 +13,9 @@ import { Loader2, Pencil, Trash2, Plus, Upload, Film, Music, ShoppingBag, Settin
 import { toast } from "sonner";
 import { useAppSettings } from "@/lib/app-settings";
 import { CastingAdmin } from "@/components/admin/casting-admin";
+import { AccountsAdmin } from "@/components/admin/accounts-admin";
 import { QuicksAdmin } from "@/components/admin/quicks-admin";
-import { Users, Zap } from "lucide-react";
+import { Users, Zap, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -56,6 +57,7 @@ function AdminPage() {
               <TabsTrigger value="merch" className="gap-2 shrink-0"><ShoppingBag className="h-4 w-4" /> Boutique</TabsTrigger>
               <TabsTrigger value="settings" className="gap-2 shrink-0"><SettingsIcon className="h-4 w-4" /> Apparence</TabsTrigger>
               <TabsTrigger value="premium" className="gap-2 shrink-0"><Crown className="h-4 w-4" /> Premium</TabsTrigger>
+            <TabsTrigger value="accounts" className="gap-2 shrink-0"><ShieldCheck className="h-4 w-4" /> Comptes</TabsTrigger>
             </TabsList>
           </div>
 
@@ -68,6 +70,7 @@ function AdminPage() {
           <TabsContent value="merch"><MerchAdmin /></TabsContent>
           <TabsContent value="settings"><SettingsAdmin /></TabsContent>
           <TabsContent value="premium"><PremiumAdmin /></TabsContent>
+          <TabsContent value="accounts"><AccountsAdmin /></TabsContent>
         </Tabs>
       </main>
     </div>

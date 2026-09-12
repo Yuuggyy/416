@@ -64,7 +64,12 @@ export function QuicksAdmin() {
             <div key={q.id} className="rounded-lg border border-border bg-card overflow-hidden flex flex-col">
               <video src={q.video_url} controls preload="metadata" className="w-full aspect-[9/16] bg-black object-cover" />
               <div className="p-3 space-y-2 flex-1 flex flex-col">
-                <p className="font-semibold text-sm truncate">{q.title}</p>
+                <p className="font-semibold text-sm truncate">
+                  {q.title}
+                  {(q as { kind?: string }).kind === "clip" && (
+                    <span className="ml-1.5 text-[9px] font-bold uppercase bg-primary/20 text-primary px-1.5 py-0.5 rounded-full align-middle">Clip</span>
+                  )}
+                </p>
                 <p className="text-xs text-muted-foreground flex items-center gap-1"><Eye className="h-3 w-3" /> {q.views} vues</p>
                 {q.status === "pending" && (
                   <span className="text-[10px] font-bold uppercase text-yellow-600 bg-yellow-500/10 border border-yellow-500/30 px-2 py-0.5 rounded-full w-max">En attente</span>
