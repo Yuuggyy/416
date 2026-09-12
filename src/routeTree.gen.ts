@@ -9,52 +9,24 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WatchlistRouteImport } from './routes/watchlist'
-import { Route as SearchRouteImport } from './routes/search'
-import { Route as MerchRouteImport } from './routes/merch'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as BrowseRouteImport } from './routes/browse'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AccountRouteImport } from './routes/account'
-import { Route as PremiumRouteImport } from './routes/premium'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AccountRouteImport } from './routes/account'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as BrowseRouteImport } from './routes/browse'
+import { Route as CastingRouteImport } from './routes/casting'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as MerchRouteImport } from './routes/merch'
+import { Route as PremiumRouteImport } from './routes/premium'
+import { Route as QuicksRouteImport } from './routes/quicks'
+import { Route as SearchRouteImport } from './routes/search'
+import { Route as WatchlistRouteImport } from './routes/watchlist'
 import { Route as ArtistsIndexRouteImport } from './routes/artists.index'
-import { Route as WatchIdRouteImport } from './routes/watch.$id'
 import { Route as ArtistsIdRouteImport } from './routes/artists.$id'
+import { Route as WatchIdRouteImport } from './routes/watch.$id'
 
-const WatchlistRoute = WatchlistRouteImport.update({
-  id: '/watchlist',
-  path: '/watchlist',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SearchRoute = SearchRouteImport.update({
-  id: '/search',
-  path: '/search',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MerchRoute = MerchRouteImport.update({
-  id: '/merch',
-  path: '/merch',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BrowseRoute = BrowseRouteImport.update({
-  id: '/browse',
-  path: '/browse',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PremiumRoute = PremiumRouteImport.update({
-  id: '/premium',
-  path: '/premium',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountRoute = AccountRouteImport.update({
@@ -62,9 +34,49 @@ const AccountRoute = AccountRouteImport.update({
   path: '/account',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrowseRoute = BrowseRouteImport.update({
+  id: '/browse',
+  path: '/browse',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CastingRoute = CastingRouteImport.update({
+  id: '/casting',
+  path: '/casting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MerchRoute = MerchRouteImport.update({
+  id: '/merch',
+  path: '/merch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PremiumRoute = PremiumRouteImport.update({
+  id: '/premium',
+  path: '/premium',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuicksRoute = QuicksRouteImport.update({
+  id: '/quicks',
+  path: '/quicks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WatchlistRoute = WatchlistRouteImport.update({
+  id: '/watchlist',
+  path: '/watchlist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ArtistsIndexRoute = ArtistsIndexRouteImport.update({
@@ -72,14 +84,14 @@ const ArtistsIndexRoute = ArtistsIndexRouteImport.update({
   path: '/artists/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WatchIdRoute = WatchIdRouteImport.update({
-  id: '/watch/$id',
-  path: '/watch/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ArtistsIdRoute = ArtistsIdRouteImport.update({
   id: '/artists/$id',
   path: '/artists/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WatchIdRoute = WatchIdRouteImport.update({
+  id: '/watch/$id',
+  path: '/watch/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -88,8 +100,11 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
+  '/casting': typeof CastingRoute
   '/login': typeof LoginRoute
   '/merch': typeof MerchRoute
+  '/premium': typeof PremiumRoute
+  '/quicks': typeof QuicksRoute
   '/search': typeof SearchRoute
   '/watchlist': typeof WatchlistRoute
   '/artists/$id': typeof ArtistsIdRoute
@@ -101,8 +116,11 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
+  '/casting': typeof CastingRoute
   '/login': typeof LoginRoute
   '/merch': typeof MerchRoute
+  '/premium': typeof PremiumRoute
+  '/quicks': typeof QuicksRoute
   '/search': typeof SearchRoute
   '/watchlist': typeof WatchlistRoute
   '/artists/$id': typeof ArtistsIdRoute
@@ -115,8 +133,11 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
+  '/casting': typeof CastingRoute
   '/login': typeof LoginRoute
   '/merch': typeof MerchRoute
+  '/premium': typeof PremiumRoute
+  '/quicks': typeof QuicksRoute
   '/search': typeof SearchRoute
   '/watchlist': typeof WatchlistRoute
   '/artists/$id': typeof ArtistsIdRoute
@@ -130,8 +151,11 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/browse'
+    | '/casting'
     | '/login'
     | '/merch'
+    | '/premium'
+    | '/quicks'
     | '/search'
     | '/watchlist'
     | '/artists/$id'
@@ -143,8 +167,11 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/browse'
+    | '/casting'
     | '/login'
     | '/merch'
+    | '/premium'
+    | '/quicks'
     | '/search'
     | '/watchlist'
     | '/artists/$id'
@@ -156,8 +183,11 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/browse'
+    | '/casting'
     | '/login'
     | '/merch'
+    | '/premium'
+    | '/quicks'
     | '/search'
     | '/watchlist'
     | '/artists/$id'
@@ -170,8 +200,11 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   AdminRoute: typeof AdminRoute
   BrowseRoute: typeof BrowseRoute
+  CastingRoute: typeof CastingRoute
   LoginRoute: typeof LoginRoute
   MerchRoute: typeof MerchRoute
+  PremiumRoute: typeof PremiumRoute
+  QuicksRoute: typeof QuicksRoute
   SearchRoute: typeof SearchRoute
   WatchlistRoute: typeof WatchlistRoute
   ArtistsIdRoute: typeof ArtistsIdRoute
@@ -181,53 +214,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/watchlist': {
-      id: '/watchlist'
-      path: '/watchlist'
-      fullPath: '/watchlist'
-      preLoaderRoute: typeof WatchlistRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/search': {
-      id: '/search'
-      path: '/search'
-      fullPath: '/search'
-      preLoaderRoute: typeof SearchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/merch': {
-      id: '/merch'
-      path: '/merch'
-      fullPath: '/merch'
-      preLoaderRoute: typeof MerchRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/browse': {
-      id: '/browse'
-      path: '/browse'
-      fullPath: '/browse'
-      preLoaderRoute: typeof BrowseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/premium': {
-      id: '/premium'
-      path: '/premium'
-      fullPath: '/premium'
-      preLoaderRoute: typeof PremiumRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account': {
@@ -237,11 +228,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/browse': {
+      id: '/browse'
+      path: '/browse'
+      fullPath: '/browse'
+      preLoaderRoute: typeof BrowseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/casting': {
+      id: '/casting'
+      path: '/casting'
+      fullPath: '/casting'
+      preLoaderRoute: typeof CastingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merch': {
+      id: '/merch'
+      path: '/merch'
+      fullPath: '/merch'
+      preLoaderRoute: typeof MerchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/premium': {
+      id: '/premium'
+      path: '/premium'
+      fullPath: '/premium'
+      preLoaderRoute: typeof PremiumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quicks': {
+      id: '/quicks'
+      path: '/quicks'
+      fullPath: '/quicks'
+      preLoaderRoute: typeof QuicksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/watchlist': {
+      id: '/watchlist'
+      path: '/watchlist'
+      fullPath: '/watchlist'
+      preLoaderRoute: typeof WatchlistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/artists/': {
@@ -251,13 +298,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtistsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/watch/$id': {
-      id: '/watch/$id'
-      path: '/watch/$id'
-      fullPath: '/watch/$id'
-      preLoaderRoute: typeof WatchIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/artists/$id': {
       id: '/artists/$id'
       path: '/artists/$id'
@@ -265,17 +305,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ArtistsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/watch/$id': {
+      id: '/watch/$id'
+      path: '/watch/$id'
+      fullPath: '/watch/$id'
+      preLoaderRoute: typeof WatchIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  PremiumRoute: PremiumRoute,
   AccountRoute: AccountRoute,
   AdminRoute: AdminRoute,
   BrowseRoute: BrowseRoute,
+  CastingRoute: CastingRoute,
   LoginRoute: LoginRoute,
   MerchRoute: MerchRoute,
+  PremiumRoute: PremiumRoute,
+  QuicksRoute: QuicksRoute,
   SearchRoute: SearchRoute,
   WatchlistRoute: WatchlistRoute,
   ArtistsIdRoute: ArtistsIdRoute,
@@ -285,3 +334,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

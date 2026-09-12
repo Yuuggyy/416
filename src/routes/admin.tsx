@@ -12,6 +12,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Loader2, Pencil, Trash2, Plus, Upload, Film, Music, ShoppingBag, Settings as SettingsIcon, Inbox, MessageCircle, Crown, Check, X, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { useAppSettings } from "@/lib/app-settings";
+import { CastingAdmin } from "@/components/admin/casting-admin";
+import { QuicksAdmin } from "@/components/admin/quicks-admin";
+import { Users, Zap } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -45,6 +48,8 @@ function AdminPage() {
           <div className="-mx-4 sm:mx-0 overflow-x-auto scrollbar-hide">
             <TabsList className="bg-card border border-border h-auto p-1 inline-flex w-max sm:flex sm:flex-wrap sm:w-full mx-4 sm:mx-0">
               <TabsTrigger value="orders" className="gap-2 shrink-0"><Inbox className="h-4 w-4" /> Commandes</TabsTrigger>
+              <TabsTrigger value="casting" className="gap-2 shrink-0"><Users className="h-4 w-4" /> Casting</TabsTrigger>
+              <TabsTrigger value="quicks" className="gap-2 shrink-0"><Zap className="h-4 w-4" /> Quicks</TabsTrigger>
               <TabsTrigger value="movies" className="gap-2 shrink-0"><Film className="h-4 w-4" /> Films</TabsTrigger>
               <TabsTrigger value="artists" className="gap-2 shrink-0"><Music className="h-4 w-4" /> Artistes</TabsTrigger>
               <TabsTrigger value="tracks" className="gap-2 shrink-0"><Music className="h-4 w-4" /> Titres</TabsTrigger>
@@ -55,6 +60,8 @@ function AdminPage() {
           </div>
 
           <TabsContent value="orders"><OrdersAdmin /></TabsContent>
+          <TabsContent value="casting"><CastingAdmin /></TabsContent>
+          <TabsContent value="quicks"><QuicksAdmin /></TabsContent>
           <TabsContent value="movies"><MoviesAdmin /></TabsContent>
           <TabsContent value="artists"><ArtistsAdmin /></TabsContent>
           <TabsContent value="tracks"><TracksAdmin /></TabsContent>

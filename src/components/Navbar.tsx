@@ -60,6 +60,8 @@ export function Navbar() {
               <Link to="/" className={linkCls(path === "/")}>Accueil</Link>
               <Link to="/browse" className={linkCls(path.startsWith("/browse"))}>Films</Link>
               <Link to="/artists" className={linkCls(path.startsWith("/artists"))}>Artistes</Link>
+              <Link to="/quicks" className={linkCls(path.startsWith("/quicks"))}>Quicks</Link>
+              <Link to="/casting" className={`${linkCls(path.startsWith("/casting"))} text-primary`}>Casting</Link>
               <Link to="/merch" className={linkCls(path.startsWith("/merch"))}>Boutique</Link>
               <Link to="/watchlist" className={linkCls(path === "/watchlist")}>Ma liste</Link>
               <Link to="/premium" className={`${linkCls(path === "/premium")} flex items-center gap-1 text-primary`}>✨ Premium</Link>

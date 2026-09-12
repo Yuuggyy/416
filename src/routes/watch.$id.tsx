@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2, Plus, Check, Share2, Clock, Calendar, Tag } from "lucide-react";
 import { MovieCard } from "@/components/MovieCard";
 import { toast } from "sonner";
+import { FanListen } from "@/components/FanListen";
 
 function imgUrl(url: string | null | undefined, width: number, quality = 75): string {
   if (!url) return "";
@@ -158,6 +159,10 @@ function WatchPage() {
 
       {/* Infos */}
       <div className="px-4 sm:px-6 py-5 max-w-5xl mx-auto">
+        {/* Écoutes fan / super fan + points fidélité */}
+        <div className="mb-5">
+          <FanListen trackId={movie.id} trackTitle={movie.title} />
+        </div>
         <div className="mb-4">
           <h1 className="font-display text-2xl sm:text-4xl font-bold mb-2 leading-tight">{movie.title}</h1>
 

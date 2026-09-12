@@ -11,7 +11,7 @@ const router = createRouter({
   scrollRestoration: false,
   defaultPreload: false,
   defaultPreloadStaleTime: 0,
-  basepath: "/",
+  basepath: import.meta.env.BASE_PATH ?? "/",
 });
 
 const root = createRoot(document.getElementById("root")!);
