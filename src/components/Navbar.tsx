@@ -2,10 +2,11 @@ import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Film, Search, User as UserIcon, Sun, Moon, ShoppingCart, Menu, X, Zap } from "lucide-react";
+import { LogOut, Settings, Film, Search, User as UserIcon, Sun, Moon, ShoppingCart, Menu, X, Zap, MessageCircle } from "lucide-react";
 import { useAppSettings } from "@/lib/app-settings";
 import { useTheme } from "@/lib/theme";
 import { useCart } from "@/lib/cart";
+import { fetchUnreadCount } from "@/lib/chat";
 
 export function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
@@ -16,6 +17,24 @@ export function Navbar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [chatBadge, setChatBadge] = useState(0);
+  const chatVisible = !!user && path === "/chat";
+
+  // badge : notifications de tags non lues
+  useEffect(() => {
+    if (!user) { setChatBadge(0); return; }
+    let alive = true;
+    fetchUnreadCount().then((n) => { if (alive) setChatBadge(n); }).catch(() => {});
+    const iv = setInterval(() => {
+      fetchUnreadCount().then((n) => { if (alive) setChatBadge(n); }).catch(() => {});
+    }, 60000);
+    return () => { alive = false; clearInterval(iv); };
+  }, [user, chatVisible]);
+
+  // le badge se vide quand on ouvre le chat
+  useEffect(() => {
+    if (chatVisible) setChatBadge(0);
+  }, [chatVisible]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -62,6 +81,14 @@ export function Navbar() {
               <Link to="/artists" className={linkCls(path.startsWith("/artists"))}>Artistes</Link>
               <Link to="/quicks" className={linkCls(path.startsWith("/quicks"))}>Quicks</Link>
               <Link to="/casting" className={`${linkCls(path.startsWith("/casting"))} text-primary`}>Casting</Link>
+              <Link to="/chat" className={`${linkCls(path.startsWith("/chat"))} flex items-center gap-1 relative`}>
+                <MessageCircle className="h-3.5 w-3.5" /> Chat
+                {chatBadge > 0 && !chatVisible && (
+                  <span className="absolute -top-1.5 -right-2.5 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-4 h-4 px-1 flex items-center justify-center">
+                    {chatBadge > 9 ? "9+" : chatBadge}
+                  </span>
+                )}
+              </Link>
               <Link to="/merch" className={linkCls(path.startsWith("/merch"))}>Boutique</Link>
               <Link to="/watchlist" className={linkCls(path === "/watchlist")}>Ma liste</Link>
               <Link to="/premium" className={`${linkCls(path === "/premium")} flex items-center gap-1 text-primary`}>✨ Premium</Link>
@@ -116,6 +143,7 @@ export function Navbar() {
                 { to: "/browse", label: "Films" },
                 { to: "/artists", label: "Artistes" },
                 { to: "/merch", label: "Boutique" },
+                { to: "/chat", label: "Chat" },
                 { to: "/watchlist", label: "Ma liste" },
                 { to: "/premium", label: "✨ Premium" },
                 { to: "/search", label: "Rechercher" },

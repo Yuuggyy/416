@@ -14,6 +14,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as CastingRouteImport } from './routes/casting'
+import { Route as ChatRouteImport } from './routes/chat'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MerchRouteImport } from './routes/merch'
 import { Route as PremiumRouteImport } from './routes/premium'
@@ -47,6 +48,11 @@ const BrowseRoute = BrowseRouteImport.update({
 const CastingRoute = CastingRouteImport.update({
   id: '/casting',
   path: '/casting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChatRoute = ChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
   '/casting': typeof CastingRoute
+  '/chat': typeof ChatRoute
   '/login': typeof LoginRoute
   '/merch': typeof MerchRoute
   '/premium': typeof PremiumRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
   '/casting': typeof CastingRoute
+  '/chat': typeof ChatRoute
   '/login': typeof LoginRoute
   '/merch': typeof MerchRoute
   '/premium': typeof PremiumRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/browse': typeof BrowseRoute
   '/casting': typeof CastingRoute
+  '/chat': typeof ChatRoute
   '/login': typeof LoginRoute
   '/merch': typeof MerchRoute
   '/premium': typeof PremiumRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/browse'
     | '/casting'
+    | '/chat'
     | '/login'
     | '/merch'
     | '/premium'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/browse'
     | '/casting'
+    | '/chat'
     | '/login'
     | '/merch'
     | '/premium'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/browse'
     | '/casting'
+    | '/chat'
     | '/login'
     | '/merch'
     | '/premium'
@@ -201,6 +213,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   BrowseRoute: typeof BrowseRoute
   CastingRoute: typeof CastingRoute
+  ChatRoute: typeof ChatRoute
   LoginRoute: typeof LoginRoute
   MerchRoute: typeof MerchRoute
   PremiumRoute: typeof PremiumRoute
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/casting'
       fullPath: '/casting'
       preLoaderRoute: typeof CastingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -321,6 +341,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   BrowseRoute: BrowseRoute,
   CastingRoute: CastingRoute,
+  ChatRoute: ChatRoute,
   LoginRoute: LoginRoute,
   MerchRoute: MerchRoute,
   PremiumRoute: PremiumRoute,
