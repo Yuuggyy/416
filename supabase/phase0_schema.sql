@@ -86,7 +86,7 @@ create table public.fan_listens (
 );
 -- une écoute comptabilisée par titre et par jour (anti-farm)
 create unique index if not exists fan_listens_once_per_day
-  on public.fan_listens (user_id, track_id, listen_type, (date(created_at)));
+  on public.fan_listens (user_id, track_id, listen_type, ((created_at AT TIME ZONE 'Africa/Kinshasa')::date));
 
 -- ---------- 6) Points de fidélité (registre)
 create table public.loyalty_ledger (
