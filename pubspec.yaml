@@ -1,0 +1,30 @@
+name: quatro
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  http: ^1.2.1
+  intl: ^0.19.0
+  url_launcher: ^6.3.0
+  velocity_x: ^4.2.1
+  google_fonts: ^6.2.1
+  flutter_animate: ^4.5.0
+  image_picker: ^1.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+
