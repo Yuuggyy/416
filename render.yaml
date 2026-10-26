@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: quatro-416-api
+    runtime: python
+    plan: free
+    rootDir: django_backend
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate && python manage.py seed_416
+    startCommand: gunicorn quatro_backend.wsgi:application
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: 'False'
+      - key: DJANGO_SUPERUSER_EMAIL
+        value: guymuzongo1234@gmail.com
+      - key: DJANGO_SUPERUSER_USERNAME
+        value: admin416
+      - key: DJANGO_SUPERUSER_PASSWORD
+        value: Admin@416Records
+      - key: DATABASE_URL
+        fromDatabase:
+          name: quatro-416-db
+          property: connectionString
+
+databases:
+  - name: quatro-416-db
+    plan: free
+    databaseName: quatro416
+    user: quatro416

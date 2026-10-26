@@ -8,8 +8,9 @@ import '../models/user.dart';
 import '../models/cart.dart';
 
 class DjangoApiService {
-  static String baseUrl = 'http://192.168.1.78:8000/api';
-  static bool useMockFallback = true; // Set to true to populate complete initial fields across all UI views
+  // Backend 416 Records hébergé (Render + Postgres) — API réelle, données dynamiques
+  static String baseUrl = 'https://quatro-416-api.onrender.com/api';
+  static bool useMockFallback = false; // Les données viennent désormais du vrai backend Django
 
   static Map<String, String> _headers([String? token]) {
     final headers = {
