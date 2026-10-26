@@ -8,9 +8,9 @@ import '../models/user.dart';
 import '../models/cart.dart';
 
 class DjangoApiService {
-  // Backend 416 Records hébergé (Render + Postgres) — API réelle, données dynamiques
-  static String baseUrl = 'https://quatro-416-api.onrender.com/api';
-  static bool useMockFallback = false; // Les données viennent désormais du vrai backend Django
+  // Backend 416 Records EN LIGNE — Cloudflare Worker + PostgreSQL réel, sans mock
+  static String baseUrl = 'https://quatro-416-api.guymuzongo1234.workers.dev/api';
+  static bool useMockFallback = false; // Données dynamiques du backend réel
 
   static Map<String, String> _headers([String? token]) {
     final headers = {
