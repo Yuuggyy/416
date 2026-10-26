@@ -11,6 +11,7 @@ class Artist {
   final String socialSpotify;
   final List<String> topTracksIds;
   final int startYear;
+  final bool isVerified;
 
   Artist({
     required this.id,
@@ -25,6 +26,7 @@ class Artist {
     this.socialSpotify = '',
     this.topTracksIds = const [],
     this.startYear = 2020,
+    this.isVerified = true,
   });
 
   factory Artist.fromJson(Map<String, dynamic> json) {
@@ -41,6 +43,7 @@ class Artist {
       socialSpotify: json['social_spotify'] ?? json['socialSpotify'] ?? '',
       topTracksIds: List<String>.from(json['top_tracks_ids'] ?? []),
       startYear: json['start_year'] ?? json['startYear'] ?? 2020,
+      isVerified: json['is_verified'] ?? json['isVerified'] ?? true,
     );
   }
 
@@ -58,6 +61,7 @@ class Artist {
       'social_spotify': socialSpotify,
       'top_tracks_ids': topTracksIds,
       'start_year': startYear,
+      'is_verified': isVerified,
     };
   }
 }
